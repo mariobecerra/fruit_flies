@@ -36,3 +36,10 @@ write_csv(transformed_design_list$design_with_mixture, here("out/2nd_i_optimal_d
 
 
 
+design_df %>%
+  pivot_longer(1:8) %>%
+  ggplot() +
+  geom_histogram(aes(value)) +
+  facet_wrap(~name, scales = "free_y")
+
+
