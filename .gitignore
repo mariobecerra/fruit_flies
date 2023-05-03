@@ -1,0 +1,5 @@
+out/*
+data/*
+*.Rhistory
+.DS_Store
+
