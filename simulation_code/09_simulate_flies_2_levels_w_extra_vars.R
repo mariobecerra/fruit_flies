@@ -1,8 +1,8 @@
 library(MASS)
-library(tidyverse)
 library(opdesmixr)
 library(rstan)
 library(forcats)
+library(tidyverse)
 library(here)
 
 # To stop Stan files from crashing RStudio
@@ -10,6 +10,10 @@ rstan_options(javascript=FALSE)
 
 source(here("simulation_code/utils.R"))
 
+sims_out_folder = here("out/sims_out/")
+dir.create(sims_out_folder, showWarnings = F)
+
+date_today = Sys.Date()
 
 
 # q = 7
@@ -135,6 +139,7 @@ simulated_data = lapply(1:n_experiments, function(e){
   bind_rows()
 
 
+saveRDS(simulated_data, paste0(sims_out_folder, "model_2_levels_sim_simulated_data_tibble_", date_today, ".rds"))
 
 
 
@@ -250,6 +255,9 @@ model_stan_lkj <- stan(
 model_stan_lkj
 
 
+saveRDS(model_stan_lkj, paste0(sims_out_folder, "model_2_levels_sim_stan_object_", date_today, ".rds"))
+
+
 summary(model_stan_lkj, pars = c("alpha"), probs = c(0.1, 0.5, 0.9))$summary
 
 
@@ -348,8 +356,8 @@ summary(model_stan_lkj, pars = c("beta_level_2"), probs = c(0.1, 0.5, 0.9))$summ
 
 
 plot(model_stan_lkj, plotfun="trace", pars=("beta_level_0"))
-plot(model_stan_lkj, plotfun="trace", pars=("beta_level_1"))
-plot(model_stan_lkj, plotfun="trace", pars=("beta_level_2"))
+# plot(model_stan_lkj, plotfun="trace", pars=("beta_level_1"))
+# plot(model_stan_lkj, plotfun="trace", pars=("beta_level_2"))
 
 
 matrix(as.data.frame(summary(model_stan_lkj, pars = c("Sigma_level_0"), probs = c(0.5))$summary)$`50%`, 
