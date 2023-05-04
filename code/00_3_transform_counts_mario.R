@@ -43,7 +43,10 @@ merged_left = merged_counts %>%
   set_names(c(vars_to_select, names_mapping$new_name)) %>% 
   mutate(
     alternative = "1_left",
-    no_choice = 0)
+    no_choice = 0) %>% 
+  group_by(experiment, folder, choice_set) %>% 
+  mutate(image = 1:n()) %>% 
+  ungroup()
 
 
 merged_right = merged_counts %>% 
@@ -51,7 +54,10 @@ merged_right = merged_counts %>%
   set_names(c(vars_to_select, names_mapping$new_name)) %>% 
   mutate(
     alternative = "2_right",
-    no_choice = 0)
+    no_choice = 0) %>% 
+  group_by(experiment, folder, choice_set) %>% 
+  mutate(image = 1:n()) %>% 
+  ungroup()
 
 
 merged_no_choice =  merged_counts %>% 
@@ -63,14 +69,17 @@ merged_no_choice =  merged_counts %>%
   mutate(
     count = merged_counts$count_no_choice,
     alternative = "3_none",
-    no_choice = 1)
+    no_choice = 1) %>% 
+  group_by(experiment, folder, choice_set) %>% 
+  mutate(image = 1:n()) %>% 
+  ungroup()
 
 
 merged_all = merged_left %>% 
   bind_rows(merged_right) %>% 
   bind_rows(merged_no_choice) %>% 
   arrange(date_time, alternative) %>% 
-  select(experiment, date_time, folder, choice_set, alternative, all_of(names_mapping$new_name), no_choice) %>% 
+  select(experiment, date_time, folder, choice_set, alternative, all_of(names_mapping$new_name), no_choice, image) %>% 
   mutate(alternative = as.factor(alternative)) %>% 
   filter(folder != "F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0")
 
