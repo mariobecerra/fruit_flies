@@ -35,9 +35,20 @@ transformed parameters {
   cov_matrix[n_mixture_cols+1] Sigma_level_1 = quad_form_diag(Omega_level_1, tau_level_1);
   // quad_form_diag(matrix Omega, vector tau) returns the quadratic form, i.e., diag_matrix(tau) * Omega * diag_matrix(tau).
   // Sigma = diag_matrix(tau) * Omega * diag_matrix(tau)
+  
+  vector[n_alt*n_images] utilities_all;
+  
+  // Save the utilities of each observation in a vector
+  for(i in 1:n_images){
+    utilities_all[start[i]:end[i]] = X[start[i]:end[i], 1:(n_mixture_cols+1)]*beta_level_2[cs_index_2[i]] + X[start[i]:end[i], (n_mixture_cols+2):n_var]*alpha;
+  }
+  
 }
 
 model {
+  
+  // vector[n_alt*n_images] utilities_all;
+  // matrix[n_images, n_alt] utilities_all;
   
   // In LKJ:
   // if eta = 1, then the density is uniform over correlation matrices of a given order K (the number of row/column).
@@ -70,11 +81,20 @@ model {
   
   
   for(i in 1:n_images){
-    vector[n_alt] utilities;
-    utilities = X[start[i]:end[i], 1:(n_mixture_cols+1)]*beta_level_2[cs_index_2[i]] + X[start[i]:end[i], (n_mixture_cols+2):n_var]*alpha;
-    target += sum(log_softmax(utilities) .* Ny[start[i]:end[i]]);
+    target += sum(log_softmax(utilities_all[start[i]:end[i]]) .* Ny[start[i]:end[i]]);
   }
   
-  
 }
+
+
+
+// generated quantities {
+//   vector[n_alt*n_images] utilities_all_2;
+//   
+//   for(i in 1:n_images){
+//     utilities_all_2[start[i]:end[i]] = X[start[i]:end[i], 1:(n_mixture_cols+1)]*beta_level_2[cs_index_2[i]] + X[start[i]:end[i], (n_mixture_cols+2):n_var]*alpha;
+//   }
+// 
+// }
+
 

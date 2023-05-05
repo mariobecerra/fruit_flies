@@ -149,7 +149,7 @@ saveRDS(simulated_data, paste0(sims_out_folder, "model_2_levels_sim_simulated_da
 model_mat_1 = simulated_data %>% 
   select(starts_with("model_mat"))
   
-# Reorder columns so that first columns are mixture relates, then no_choice, and then the extra variables
+# Reorder columns so that first columns are mixture related, then no_choice, and then the extra variables
 n_mixture_cols = ncol(model_mat_1)-length(alpha_parameters)-1
 order_columns_aux_1 = c(1:n_mixture_cols, ncol(model_mat_1))
 order_columns_aux_2 = setdiff(1:ncol(model_mat_1), order_columns_aux_1)
@@ -392,4 +392,14 @@ summary(model_stan_lkj, pars = c("beta_level_2"), probs = c(0.1, 0.5, 0.9))$summ
 
 
 
+utilities_all_mean = get_posterior_mean(model_stan_lkj, "utilities_all")
+utilities_all_mean[, ncol(utilities_all_mean)] %>% head()
 
+simulated_data %>% 
+  mutate(utility_model = utilities_all_mean[, ncol(utilities_all_mean)]) %>% 
+  filter(no_choice_ind == 0) %>% 
+  select(comp_1, comp_2, comp_3, other_vars_1, other_vars_2, utility_model) %>% 
+  distinct() %>% 
+  group_by(other_vars_1, other_vars_2) %>% 
+  top_n(1, utility_model) %>% 
+  as.data.frame()
