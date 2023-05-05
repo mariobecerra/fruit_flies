@@ -144,7 +144,7 @@ stan_data <- list(
 
 # Stan model ------------
 model_stan_lkj <- stan(
-  file = here("code/european_flies_04_hmnl_2_levels.stan"),
+  file = here("code/european_flies_06_hmnl_2_levels.stan"),
   data = stan_data, 
   seed = 2023,
   iter = 1500,  warmup = 1000, chains = 1, cores = 4)

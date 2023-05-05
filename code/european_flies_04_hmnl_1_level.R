@@ -196,7 +196,7 @@ init_fun <- function() {
 
 # 2 hours with 1500 iterations
 model_stan <- stan(
-  file = here("code/european_flies_05_hmnl_1_level.stan"),
+  file = here("code/european_flies_04_hmnl_1_level.stan"),
   data = stan_data,
   seed = 2023,
   iter = 1500,  warmup = 1000, chains = 4, cores = 4,
