@@ -8,7 +8,7 @@ rstan_options(javascript=FALSE)
 design_mapping = read_csv("data/design_mapping.csv")
 
 # There's a mistake here, should have filtered out experiment number 1.
-counts_european = read_csv(here("out/counts_european_choice_format.csv"))
+counts_european = read_csv(here("out/counts_choice_format.csv"))
 
 max_counts = counts_european %>% 
   group_by(experiment, choice_set, folder, alternative) %>% 
