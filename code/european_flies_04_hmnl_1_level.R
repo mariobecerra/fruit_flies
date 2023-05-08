@@ -29,7 +29,7 @@ images_indices = counts_european %>%
   ungroup()
 
 
-data_dmela_sample <- images_indices %>% 
+counts_european_sample <- images_indices %>% 
   left_join(counts_european) %>% 
   as.data.frame() %>% 
   mutate(time_day = as.numeric(substr(as.character(date_time), 12, 13))) %>% 
@@ -42,7 +42,7 @@ data_dmela_sample <- images_indices %>%
 
 
 # Stan data ------------
-unique_experiment_choice_set = data_dmela_sample %>%
+unique_experiment_choice_set = counts_european_sample %>%
   select(experiment, folder) %>%
   distinct()
 
@@ -51,7 +51,7 @@ index_dataframe = lapply(1:nrow(unique_experiment_choice_set), function(i){
   exp_i = unique_experiment_choice_set$experiment[i]
   cs_i =  unique_experiment_choice_set$folder[i]
   
-  indices_i = which(data_dmela_sample$folder == cs_i & data_dmela_sample$experiment == exp_i)
+  indices_i = which(counts_european_sample$folder == cs_i & counts_european_sample$experiment == exp_i)
   out = tibble(
     choice_set = cs_i,
     start = indices_i[1],
@@ -63,7 +63,7 @@ index_dataframe = lapply(1:nrow(unique_experiment_choice_set), function(i){
 
 # n_betas_level_2 = nrow(index_dataframe)
 
-unique_experiment_choice_set_image = data_dmela_sample %>%
+unique_experiment_choice_set_image = counts_european_sample %>%
   select(experiment, folder, image) %>%
   distinct()
 
@@ -72,7 +72,7 @@ index_dataframe_image = lapply(1:nrow(unique_experiment_choice_set_image), funct
   cs_i =  unique_experiment_choice_set_image$folder[i]
   image_i =  unique_experiment_choice_set_image$image[i]
   
-  indices_i = which(data_dmela_sample$folder == cs_i & data_dmela_sample$experiment == exp_i & data_dmela_sample$image == image_i)
+  indices_i = which(counts_european_sample$folder == cs_i & counts_european_sample$experiment == exp_i & counts_european_sample$image == image_i)
   out = tibble(
     exp = exp_i,
     choice_set = cs_i,
@@ -100,11 +100,11 @@ mixture_intensity_interaction_names = c('R*intensity','O*intensity','Y*intensity
 'B*intensity','P*intensity','UV*intensity')
 
 
-X_other_vars_nc <- data_dmela_sample %>% 
+X_other_vars_nc <- counts_european_sample %>% 
   select(c('no_choice','is_right', 'is_daytime')) %>%
   as.data.frame()
 
-X_main <- data_dmela_sample %>% ungroup() %>%
+X_main <- counts_european_sample %>% ungroup() %>%
   select(c(mixture_variable_names,'intensity')) %>%
   as.data.frame()
 
@@ -134,7 +134,7 @@ X_stan <- X_main %>%
   as.matrix()
 
 
-n_experiments = max(data_dmela_sample$experiment)
+n_experiments = max(counts_european_sample$experiment)
 n_extra_vars = 2
 n_mixture_cols = dim(X_stan)[2] - n_extra_vars - 1
 
@@ -146,7 +146,7 @@ stan_data <- list(
   # n_betas_level_2 = n_betas_level_2,
   n_var = ncol(X_stan), 
   n_obs = nrow(X_stan),
-  Ny = data_dmela_sample$count,
+  Ny = counts_european_sample$count,
   X = X_stan,
   experiment = index_dataframe$exp,
   choice_set = index_dataframe$choice_set,
@@ -369,7 +369,7 @@ diag(Sigma_level_1_posterior_median)
 
 utilities_all_mean = get_posterior_mean(model_stan, "utilities_all")
 
-data_dmela_sample %>% 
+counts_european_sample %>% 
   mutate(utility_model = utilities_all_mean[, ncol(utilities_all_mean)]) %>% 
   filter(no_choice == 0) %>% 
   select(all_of(c('R','O','Y','G','B','P', 'UV', 'intensity', colnames(X_other_vars_nc))), utility_model) %>% 
@@ -380,3 +380,30 @@ data_dmela_sample %>%
 
 
 
+
+
+# counts_by_image = counts_european_sample %>% 
+#   filter(no_choice != 1) %>% 
+#   group_by(experiment, image, choice_set, date_time, is_daytime) %>% 
+#   summarize(n_flies = sum(count))
+# 
+# 
+# counts_by_image %>% 
+#   ggplot(aes(date_time, n_flies, color = is_daytime)) +
+#   geom_point(size = 0.6) +
+#   geom_line(size = 0.4) +
+#   facet_wrap(~experiment, scales = "free") +
+#   theme_bw()
+# 
+# 
+# 
+# counts_by_image %>% 
+#   mutate(time_day = as.numeric(substr(as.character(date_time), 12, 13))) %>% 
+#   group_by(experiment,time_day) %>% 
+#   summarize(avg_n_flies = sum(n_flies)/n()) %>% 
+#   ggplot(aes(time_day, avg_n_flies)) +
+#   geom_point(size = 0.6) +
+#   geom_line(size = 0.4) +
+#   facet_wrap(~experiment, scales = "free") +
+#   theme_bw()
+# 
