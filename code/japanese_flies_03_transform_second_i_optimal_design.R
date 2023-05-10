@@ -31,8 +31,9 @@ transformed_design_list <- transform_design_flies(
 
 
 
-write_csv(transformed_design_list$design_software, here("out/2nd_i_optimal_design_japanese_frank.csv"))
-write_csv(transformed_design_list$design_with_mixture, here("out/2nd_i_optimal_design_japanese_mapping.csv"))
+
+write.csv(transformed_design_list$design_software, here("out/2nd_i_optimal_design_japanese_frank.csv"), row.names = F)
+write.csv(transformed_design_list$design_with_mixture, here("out/2nd_i_optimal_design_japanese_mapping.csv"), row.names = F)
 
 
 
