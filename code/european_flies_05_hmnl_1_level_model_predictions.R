@@ -33,11 +33,11 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
   
   
   X_other_vars_nc <- df_to_convert %>% 
-    select(all_of(c('no_choice','is_right', 'is_daytime'))) %>%
+    dplyr::select(all_of(c('no_choice','is_right', 'is_daytime'))) %>%
     as.data.frame()
   
   X_main <- df_to_convert %>% 
-    select(all_of(c(mixture_variable_names,'intensity'))) %>%
+    dplyr::select(all_of(c(mixture_variable_names,'intensity'))) %>%
     as.data.frame()
   
   
@@ -51,13 +51,13 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
   
   
   X_color_intensity <- X_main %>%
-    select(c(mixture_variable_names,'intensity')) %>%
+    dplyr::select(c(mixture_variable_names,'intensity')) %>%
     mutate(across(c(mixture_variable_names,'intensity'), ~.*intensity)) %>%
     set_names(c(mixture_intensity_interaction_names,'intensity^2'))
   
   
   X <- X_main %>% 
-    select(-UV, -intensity) %>% 
+    dplyr::select(-UV, -intensity) %>% 
     bind_cols(X_color_pairwise) %>% 
     bind_cols(X_color_intensity) %>%
     bind_cols(X_other_vars_nc) %>% 
@@ -177,7 +177,7 @@ betas_level_1_summary %>%
 beta_level_0_draws = rstan::extract(model_stan, "beta_level_0")
 Sigma_level_0_draws = rstan::extract(model_stan, "Sigma_level_0")
 
-Sigma_level_1_draws = rstan::extract(model_stan, "Sigma_level_1")
+# Sigma_level_1_draws = rstan::extract(model_stan, "Sigma_level_1")
 
 alpha_draws = rstan::extract(model_stan, "alpha")
 

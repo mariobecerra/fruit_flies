@@ -38,7 +38,7 @@ counts_european_sample <- images_indices %>%
     is_daytime = ifelse(time_day >= 9 & time_day <= 20, 1, 0) # 1 = 9-20h, 0 = 21-23h + 0-8h
   ) 
 
-
+saveRDS(counts_european_sample, here("out/european_flies_hmnl_1_level_data_sample.rds"))
 
 
 # Stan data ------------
@@ -194,12 +194,13 @@ init_fun <- function() {
   return(out_list)
 }
 
-# 2 hours with 1500 iterations
+# 10 hours with 2500 iterations (but rstan said 16,545 seconds), 6 divergent transitions
 model_stan <- stan(
   file = here("code/european_flies_04_hmnl_1_level.stan"),
   data = stan_data,
   seed = 2023,
-  iter = 1500,  warmup = 1000, chains = 4, cores = 4,
+  # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
+  iter = 2500,  warmup = 2000, chains = 4, cores = 4,
   init = init_fun
 )
 
@@ -375,8 +376,10 @@ counts_european_sample %>%
   select(all_of(c('R','O','Y','G','B','P', 'UV', 'intensity', colnames(X_other_vars_nc))), utility_model) %>% 
   distinct() %>% 
   group_by(across(all_of(colnames(X_other_vars_nc)))) %>% 
-  top_n(1, utility_model) %>% 
-  as.data.frame()
+  top_n(3, utility_model) %>% 
+  as.data.frame() %>% 
+  ungroup() %>% 
+  arrange(desc(utility_model))
 
 
 
