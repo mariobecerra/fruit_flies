@@ -93,25 +93,24 @@ df_to_fit <- counts_european_sample %>%
   as.data.frame()
 
 
-
-X_stan <- create_model_matrix_second_order_scheffe(df_to_fit)
+X_stan_list = create_model_matrix_second_order_scheffe(df_to_fit)
 
 
 
 n_experiments = max(counts_european_sample$experiment)
 # n_extra_vars = 2
 n_extra_vars = 1
-n_mixture_cols = dim(X_stan)[2] - n_extra_vars - 1
+n_mixture_cols = dim(X_stan_list$X)[2] - n_extra_vars - 1
 
 
 
 stan_data <- list(
   n_alt = 3, 
   n_exp = n_experiments,
-  n_var = ncol(X_stan), 
-  n_obs = nrow(X_stan),
+  n_var = ncol(X_stan_list$X), 
+  n_obs = nrow(X_stan_list$X),
   Ny = counts_european_sample$count,
-  X = X_stan,
+  X = X_stan_list$X,
   experiment = index_dataframe$exp,
   choice_set = index_dataframe$choice_set,
   
@@ -186,7 +185,7 @@ prior_params_summary = tibble(prior_mean = c(-2.99, -1.02, -0.25, -0.63, -2.54, 
 betas_level_0_summary = summary(model_stan, pars = c("beta_level_0", "alpha"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
   as.data.frame() %>% 
   select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
-  mutate(variable = colnames(X_stan),
+  mutate(variable = colnames(X_stan_list$X),
          ix = 1:n()) %>%
   mutate(variable = fct_reorder(variable, ix, .desc = T)) %>% 
   bind_cols(prior_params_summary)
@@ -255,20 +254,7 @@ betas_level_0_summary %>%
 
 
 
-mixture_pairwise_interaction_names = c(
-  'R*O','R*Y','R*G','R*B','R*P','R*UV',
-  'O*Y','O*G','O*B','O*P','O*UV',
-  'Y*G','Y*B','Y*P','Y*UV',
-  'G*B','G*P','G*UV',
-  'B*P','B*UV',
-  'P*UV')
-
-mixture_intensity_interaction_names = c('R*intensity','O*intensity','Y*intensity','G*intensity',
-                                        'B*intensity','P*intensity','UV*intensity')
-
-color_int = c(mixture_intensity_interaction_names,'intensity^2')
-
-names_betas_level_1 = c(mixture_variable_names_no_UV, mixture_pairwise_interaction_names, color_int, "no_choice")
+names_betas_level_1 = X_stan_list$names_betas_level_1
 
 
 betas_level_1_summary = summary(model_stan, pars = c("beta_level_1"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
@@ -336,7 +322,7 @@ utilities_all_mean = get_posterior_mean(model_stan, "utilities_all")
 counts_european_sample %>% 
   mutate(utility_model = utilities_all_mean[, ncol(utilities_all_mean)]) %>% 
   filter(no_choice == 0) %>% 
-  select(all_of(c('R','O','Y','G','B','P', 'UV', 'intensity', 'no_choice','is_right')), utility_model) %>% 
+  select(all_of(names(df_to_fit)), utility_model) %>% 
   distinct() %>% 
   group_by(across(all_of(c('no_choice','is_right')))) %>% 
   top_n(3, utility_model) %>% 

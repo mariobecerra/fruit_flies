@@ -78,7 +78,14 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
     bind_cols(X_other_vars_nc) %>% 
     as.matrix()
   
-  return(X)
+  names_betas_level_1 = c(mixture_variable_names_no_UV, mixture_pairwise_interaction_names, mixture_intensity_interaction_names,'intensity^2', "no_choice")
+  
+  return(list(
+    X = X,
+    mixture_pairwise_interaction_names = mixture_pairwise_interaction_names,
+    mixture_intensity_interaction_names = mixture_intensity_interaction_names,
+    names_betas_level_1 = names_betas_level_1
+    ))
 }
 
 
