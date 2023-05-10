@@ -34,6 +34,10 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
   }
   
   
+  
+  mixture_variable_names_no_UV = c('R','O','Y','G','B','P')
+  mixture_variable_names = c(mixture_variable_names_no_UV, 'UV')
+  
   mixture_pairwise_interaction_names = c(
     'R*O','R*Y','R*G','R*B','R*P','R*UV',
     'O*Y','O*G','O*B','O*P','O*UV',
@@ -66,7 +70,7 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
   
   
   X_color_intensity <- X_main %>%
-    dplyr::select(c(mixture_variable_names,'intensity')) %>%
+    dplyr::select(all_of(c(mixture_variable_names,'intensity'))) %>%
     mutate(across(c(mixture_variable_names,'intensity'), ~.*intensity)) %>%
     set_names(c(mixture_intensity_interaction_names,'intensity^2'))
   
@@ -82,6 +86,8 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
   
   return(list(
     X = X,
+    mixture_variable_names_no_UV = mixture_variable_names_no_UV,
+    mixture_variable_names = mixture_variable_names,
     mixture_pairwise_interaction_names = mixture_pairwise_interaction_names,
     mixture_intensity_interaction_names = mixture_intensity_interaction_names,
     names_betas_level_1 = names_betas_level_1
@@ -89,17 +95,29 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
 }
 
 
-create_lattice_design = function(n_var = 3, n_levels = 5){
-  # Example: create_lattice_design(3, 10)
+
+
+create_lattice_design = function(n_var = 3, n_levels = 5, limits = NULL){
+  # Examples: 
+  # create_lattice_design(3, 10)
+  #
+  # limits = cbind(c(0.4, 0.55), c(0, 0.5), c(0.1, 0.45))
+  # create_lattice_design(3, 10, limits)
   
-  # create_lattice_design(q, 20) %>% 
+  # create_lattice_design(3, 20) %>%
   #   ggtern::ggtern(ggtern::aes(x1, x2, x3)) +
   #   geom_point(shape = "x", size = 4) +
   #   theme_minimal() +
   #   ggtern::theme_nomask()
   
+  if(!is.null(limits)){
+    if(ncol(limits) != n_var) stop("limits should have ", n_var, " columns because n_var = ", n_var)
+  } else{
+    limits = matrix(replicate(n_var, c(0, 1)), ncol = n_var)
+  }
+  
   lattice_df = lapply(1:n_var, function(i){
-    tibble(x = seq(0, 1, by = (1/n_levels))) %>% 
+    tibble(x = seq(limits[1, i], limits[2, i], length.out = n_levels)) %>% 
       set_names(paste0("x", i))
   }) %>% 
     bind_cols() %>% 
@@ -109,5 +127,27 @@ create_lattice_design = function(n_var = 3, n_levels = 5){
   
   return(lattice_df)
 }
+
+
+# create_lattice_design = function(n_var = 3, n_levels = 5){
+#   # Example: create_lattice_design(3, 10)
+#   
+#   # create_lattice_design(q, 20) %>% 
+#   #   ggtern::ggtern(ggtern::aes(x1, x2, x3)) +
+#   #   geom_point(shape = "x", size = 4) +
+#   #   theme_minimal() +
+#   #   ggtern::theme_nomask()
+#   
+#   lattice_df = lapply(1:n_var, function(i){
+#     tibble(x = seq(0, 1, by = (1/n_levels))) %>% 
+#       set_names(paste0("x", i))
+#   }) %>% 
+#     bind_cols() %>% 
+#     expand.grid() %>% 
+#     as_tibble() %>% 
+#     slice(which(abs(apply(., 1, sum) - 1) < 1e-12))
+#   
+#   return(lattice_df)
+# }
 
 
