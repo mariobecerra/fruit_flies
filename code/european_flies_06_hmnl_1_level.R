@@ -84,12 +84,9 @@ index_dataframe_image = lapply(1:nrow(unique_experiment_choice_set_image), funct
   mutate(choice_set_2 = as.integer(fct(paste(exp, choice_set))))
 
 
-mixture_variable_names_no_UV = c('R','O','Y','G','B','P')
-mixture_variable_names = c(mixture_variable_names_no_UV, 'UV')
-
 
 df_to_fit <- counts_european_sample %>% 
-  select(all_of(c(mixture_variable_names,'intensity','is_right', 'no_choice'))) %>%
+  select(all_of(c('R','O','Y','G','B','P','UV','intensity','is_right', 'no_choice'))) %>%
   as.data.frame()
 
 
