@@ -51,7 +51,8 @@ betas_level_0_summary %>%
   theme_bw() +
   xlab("Parameter") +
   ylab("Value") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ggtitle("Hierarchical model", subtitle = "Betas level 0")
 
 
 
@@ -92,7 +93,8 @@ betas_level_1_summary %>%
   coord_flip() +
   theme_bw() +
   xlab("Parameter") +
-  ylab("Value")
+  ylab("Value") +
+  ggtitle("Hierarchical model", subtitle = "Betas level 1")
 
 
 
@@ -109,7 +111,8 @@ betas_level_1_summary %>%
   geom_vline(xintercept = 1:36 + 0.5, size = 0.3, color = "black") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank())
+        panel.grid.minor.x = element_blank()) +
+  ggtitle("Hierarchical model", subtitle = "Betas level 1")
 
 
 

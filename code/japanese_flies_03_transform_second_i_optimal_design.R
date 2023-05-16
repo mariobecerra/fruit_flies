@@ -11,7 +11,7 @@ source(here("code/transform_design_function.R"))
 # IMPORT DESIGN --------------------------------------------------------------
 # intensity_df <- read_excel(here("data/intensity.xlsx")) %>% 
 #   as.data.frame()
-intensity_df <- read_excel(here("data/intensity_new.xlsx")) %>% 
+intensity_df <- read_excel(here("data/intensities_thorlabs.xlsx")) %>% 
   as.data.frame()
 
 # design_object = readRDS(here("out/second_i_optimal_design_japanese_old.rds"))
