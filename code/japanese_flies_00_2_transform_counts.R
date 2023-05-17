@@ -4,7 +4,7 @@ library(here)
 
 
 # Update with latest counts!!!
-count_data = read_csv(here('data/counts_2023-05-03.csv'))
+count_data = read_csv(here('data/counts_japanese_2023-05-17.csv'))
 
 
 design_mapping = read_csv(here("data/design_mapping.csv"))
