@@ -7,7 +7,7 @@ rstan_options(javascript=FALSE)
 
 source(here("code/european_flies_06_hmnl_1_level_utils.R"))
 
-counts_european = read_csv(here("out/counts_choice_format.csv")) %>% 
+counts_european = read_csv(here("out/counts_european_choice_format.csv")) %>% 
   filter(experiment != 1) %>% 
   mutate(experiment = experiment - 1)
 
@@ -24,7 +24,7 @@ images_indices = counts_european %>%
   select(experiment, folder, choice_set, image) %>% 
   distinct() %>% 
   group_by(experiment, folder, choice_set) %>% 
-  slice_sample(n = 20) %>% 
+  slice_sample(n = 50) %>% 
   arrange(experiment, choice_set, image) %>% 
   ungroup()
 
@@ -38,7 +38,7 @@ counts_european_sample <- images_indices %>%
     is_daytime = ifelse(time_day >= 9 & time_day <= 20, 1, 0) # 1 = 9-20h, 0 = 21-23h + 0-8h
   ) 
 
-saveRDS(counts_european_sample, here("out/european_flies_hmnl_1_level_data_sample_nodaytime.rds"))
+saveRDS(counts_european_sample, here("out/european_flies_hmnl_1_level_data_sample_nodaytime_50_images.rds"))
 
 
 # Stan data ------------
@@ -137,20 +137,21 @@ init_fun <- function() {
 }
 
 
-# 10 hours with 2500 iterations (but rstan said 16,545 seconds), 6 divergent transitions
-# 9 hours for 2000 iterations but Stan says 13671 seconds, 2 divergent transitions
+# 10 hours with 2500 iterations (20 images) (but rstan said 16,545 seconds), 6 divergent transitions
+# 9 hours for 2000 iterations (20 images) but Stan says 13671 seconds, 2 divergent transitions
+# 20 hours for 3000 iterations (50 images), no divergent transitions.
 model_stan <- stan(
   file = here("code/european_flies_06_hmnl_1_level.stan"),
   data = stan_data,
   seed = 2023,
   # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
-  iter = 2000,  warmup = 1500, chains = 4, cores = 4,
+  iter = 3000,  warmup = 2000, chains = 6, cores = 6,
   # iter = 25, chains = 1,
   init = init_fun
 )
 
-saveRDS(model_stan, here("out/european_flies_hmnl_1_level_stan_object_noisdaytime.rds"))
+saveRDS(model_stan, here("out/european_flies_hmnl_1_level_stan_object_noisdaytime_50_images_3000_iter.rds"))
 
 # model_stan <- stan(
 #   file = here("code/european_flies_05_hmnl_1_level.stan"),

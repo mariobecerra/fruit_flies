@@ -7,7 +7,7 @@ rstan_options(javascript=FALSE)
 
 source(here("code/european_flies_06_hmnl_1_level_utils.R"))
 
-counts_european = read_csv(here("out/counts_choice_format.csv")) %>% 
+counts_european = read_csv(here("out/counts_european_choice_format.csv")) %>% 
   filter(experiment != 1) %>% 
   mutate(experiment = experiment - 1)
 
@@ -24,7 +24,7 @@ images_indices = counts_european %>%
   select(experiment, folder, choice_set, image) %>% 
   distinct() %>% 
   group_by(experiment, folder, choice_set) %>% 
-  slice_sample(n = 20) %>% 
+  slice_sample(n = 50) %>% 
   arrange(experiment, choice_set, image) %>% 
   ungroup()
 
@@ -145,21 +145,28 @@ init_fun <- function() {
 }
 
 
+Sys.time()
 
 # about 1 hour with 1000 iterations and 5 images per cs, 312 divergent transitions
 # 5 hours with 4000 iterations and 20 images, 423 divergent transitions
+# 8 hours with 6000 iterations, 6 cores, 50 images per cs, 1468 divergent transitions. Ran out of RAM or something because got error of not being able to allocate vector oZ 6 Gb.
 model_stan <- stan(
   file = here("code/european_flies_08_random_effects_model.stan"),
   data = stan_data,
   seed = 2023,
   # iter = 1000,  warmup = 500, chains = 4, cores = 4,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
-  iter = 4000,  warmup = 3000, chains = 4, cores = 4,
+  iter = 6000,  warmup = 5000, chains = 6, cores = 6,
   # iter = 25, chains = 1,
-  init = init_fun
+  init = init_fun,
+  save_warmup = F 
 )
 
+Sys.time()
+
 saveRDS(model_stan, here("out/european_flies_random_effects_model_stan_object.rds"))
+
+Sys.time()
 
 # model_stan <- stan(
 #   file = here("code/european_flies_05_hmnl_1_level.stan"),
