@@ -156,7 +156,7 @@ model_stan <- stan(
   seed = 2023,
   # iter = 1000,  warmup = 500, chains = 4, cores = 4,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
-  iter = 4000,  warmup = 3000, chains = 6, cores = 6,
+  iter = 6000,  warmup = 5000, chains = 6, cores = 6,
   # iter = 25, chains = 1,
   init = init_fun,
   save_warmup = F 
