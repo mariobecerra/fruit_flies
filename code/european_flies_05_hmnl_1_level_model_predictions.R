@@ -4,7 +4,7 @@ library(tidyverse)
 library(ggtern)
 library(here)
 
-# counts_european = read_csv(here("out/counts_choice_format.csv")) %>% 
+# counts_european = read_csv(here("out/counts_european_choice_format.csv")) %>% 
 #   filter(experiment != 1) %>% 
 #   mutate(experiment = experiment - 1)
 

@@ -93,5 +93,5 @@ for(i in 2:nrow(all_counts)){
 
 
 date_char = as.character(Sys.Date())
-write_csv(all_counts, here(paste0("data/counts_european_", date_char, ".csv")))
+write_csv(all_counts, here(paste0("out/counts_european_", date_char, ".csv")))
 

@@ -7,7 +7,7 @@ library(here)
 rstan_options(javascript=FALSE)
 
 
-design_mapping = read_csv("data/design_mapping.csv")
+design_mapping = read_csv("out/design_mapping_european.csv")
 counts_european = read_csv(here("out/counts_european_choice_format.csv"))
 
 max_counts = counts_european %>% 

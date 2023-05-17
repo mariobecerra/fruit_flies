@@ -138,7 +138,15 @@ transform_design_flies = function(design_df, intensity_df) {
   
   
   design_with_mixture <- merge(exp_round[, c('chid', 'name')], 
-                               design_orig, by = 'chid')
+                               design_orig, by = 'chid') %>% 
+    dplyr::select(-chid) %>% 
+    dplyr::rename(
+      intensity_left = intensityL,
+      intensity_right = intensityR,
+      UV_left = UV1_left,
+      UV_right = UV1_right,
+      folder = name
+    )
   
   
   

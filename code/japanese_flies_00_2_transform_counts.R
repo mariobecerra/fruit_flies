@@ -4,10 +4,10 @@ library(here)
 
 
 # Update with latest counts!!!
-count_data = read_csv(here('data/counts_japanese_2023-05-17.csv'))
+count_data = read_csv(here('out/counts_japanese_2023-05-17.csv'))
 
 
-design_mapping = read_csv(here("data/design_mapping.csv"))
+design_mapping = read_csv(here("out/design_mapping_japanese.csv"))
 
 # Assume 80 flies per experiment
 n_experiments = max(count_data$experiment)
@@ -88,6 +88,6 @@ merged_all %>%
   filter(!complete.cases(.))
 
 
-write_csv(merged_all, here("out/counts_choice_format.csv"))
+write_csv(merged_all, here("out/counts_japanese_choice_format.csv"))
 
 

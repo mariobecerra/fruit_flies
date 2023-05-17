@@ -6,8 +6,8 @@ library(here)
 rstan_options(javascript=FALSE)
 
 
-design_mapping = read_csv("data/design_mapping.csv")
-counts = read_csv(here("out/counts_choice_format.csv")) %>% 
+design_mapping = read_csv(here("out/design_mapping_japanese.csv"))
+counts = read_csv(here("out/counts_japanese_choice_format.csv")) %>% 
   filter(experiment == 1)
 
 max_counts = counts %>% 

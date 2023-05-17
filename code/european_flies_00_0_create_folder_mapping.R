@@ -197,7 +197,7 @@ design_mapping = design_1_mapping %>%
 
 
 
-write_csv(design_mapping, "data/design_mapping.csv")
+write_csv(design_mapping, here("out/design_mapping_european.csv"))
 
 
 
