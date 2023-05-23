@@ -2,6 +2,10 @@ library(rstan)
 library(tidyverse)
 library(here)
 
+# To stop Stan files from crashing RStudio
+rstan_options(javascript=FALSE)
+
+
 
 create_model_matrix_second_order_scheffe = function(df_to_convert){
   
@@ -536,7 +540,7 @@ model_stan <- stan(
   seed = 2023,
   iter = 1500,  warmup = 1000, chains = 4, cores = 4,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
-  # iter = 100, chains = 1,
+  # iter = 50, chains = 1,
   init = init_fun
 )
 

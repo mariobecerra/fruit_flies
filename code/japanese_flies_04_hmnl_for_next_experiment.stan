@@ -56,5 +56,13 @@ model {
   
 }
 
+// Save log-likelihood for LOO package
+generated quantities{
+  vector[n_images] log_lik;
+  
+  for(i in 1:n_images){
+      log_lik[i] = sum(log_softmax(X[start[i]:end[i]]*beta_level_1[exp_index[i]]) .* Ny[start[i]:end[i]]);
+    }
+}
 
 
