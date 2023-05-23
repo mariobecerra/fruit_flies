@@ -150,6 +150,7 @@ Sys.time()
 # about 1 hour with 1000 iterations and 5 images per cs, 312 divergent transitions
 # 5 hours with 4000 iterations and 20 images, 423 divergent transitions
 # 8 hours with 6000 iterations, 6 cores, 50 images per cs, 1468 divergent transitions. Ran out of RAM or something because got error of not being able to allocate vector oZ 6 Gb.
+# Ran again without saving warmup. 7 hours with 6000 iterations and 5000 of warmup, 6 cores, 50 images per cs, 562 divergent transitions.
 model_stan <- stan(
   file = here("code/european_flies_08_random_effects_model.stan"),
   data = stan_data,
