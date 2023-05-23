@@ -33,13 +33,10 @@ model {
   // if eta > 1, the correlation values in correlation matrices are going to centered around 0. higher eta indicate no correlations (converge to identity correlation matrix).
   // https://yingqijing.medium.com/lkj-correlation-distribution-in-stan-29927b69e9be
   
-  // tau ~ cauchy(0, 2.5); 
-  
-  // tau_level_0 ~ normal(0.77, 0.5); 
-  tau_level_0 ~ normal(1, 0.5);   // tau_level_1 ~ normal(0.5, 0.1);   // beta_level_0 ~ normal(0, 2);  /
+  tau_level_0 ~ normal(1, 0.5); 
   Omega_level_0 ~ lkj_corr(5);
   
-  beta_level_0 ~ normal(0, 5);
+  beta_level_0 ~ normal(0, 2);
   
   for(i in 1:n_exp){
     beta_level_1[i] ~ multi_normal(beta_level_0, Sigma_level_0);
@@ -56,13 +53,14 @@ model {
   
 }
 
-// Save log-likelihood for LOO package
-generated quantities{
-  vector[n_images] log_lik;
-  
-  for(i in 1:n_images){
-      log_lik[i] = sum(log_softmax(X[start[i]:end[i]]*beta_level_1[exp_index[i]]) .* Ny[start[i]:end[i]]);
-    }
-}
-
+ 
+// // Save log-likelihood for LOO package
+// generated quantities{
+//   vector[n_images] log_lik;
+// 
+//   for(i in 1:n_images){
+//       log_lik[i] = sum(log_softmax(X[start[i]:end[i]]*beta_level_1[exp_index[i]]) .* Ny[start[i]:end[i]]);
+//     }
+// }
+// 
 

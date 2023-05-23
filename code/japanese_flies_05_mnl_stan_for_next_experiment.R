@@ -119,7 +119,7 @@ count_data_flies_all = counts %>%
   mutate(
     min_time = min(date_time), 
     max_time = max(date_time)
-    ) %>%  
+  ) %>%  
   mutate(elapsed_mins = difftime(max_time ,min_time, "mins")) %>% 
   filter(date_time > min_time + 0.25*elapsed_mins) %>%  # remove the first 25% of the data (first 5 minutes)
   ungroup()
@@ -270,7 +270,7 @@ betas_model_01_summary = summary(model_stan_01, pars = c("beta"), probs = c(0.02
   mutate(variable = colnames(X_stan_list_01$X),
          ix = 1:n()) %>%
   mutate(variable = fct_reorder(variable, ix, .desc = F))
- 
+
 betas_model_01_summary %>% 
   ggplot(aes(x = variable)) +
   geom_point(aes(y = mean), color = "black") +
@@ -532,18 +532,143 @@ init_fun <- function() {
 }
 
 
-
+Sys.time()
 # 5 minutes for 100 iterations and 4 chains in 4 cores.
-model_stan <- stan(
-  file = here("code/japanese_flies_04_hmnl_for_next_experiment.stan"),
+# 1 hour for 1500 iterations and 4 chains in 4 cores, 217 divergent transitions.
+# 2 hours with 3500 iter (2500 warmup), 1004 divergent transitions after warmup. 
+# 3 hours with 5000 iter (3000 warmup), 1237 divergent transitions after warmup.
+model_stan_03 <- stan(
+  file = here("code/japanese_flies_05_hmnl_for_next_experiment.stan"),
   data = stan_data_03,
   seed = 2023,
-  iter = 1500,  warmup = 1000, chains = 4, cores = 4,
-  # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
+  # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
+  iter = 5000,  warmup = 3000, chains = 4, cores = 4,
   # iter = 50, chains = 1,
-  init = init_fun
+  init = init_fun,
+  save_warmup = F
 )
 
+Sys.time()
 
-model_stan_01
+saveRDS(model_stan_03, here("out/japanese_stan_object_hmnl_model_2nd_experiment.rds"))
+
+model_stan_03
+
+
+betas_level_0_summary_03 = summary(model_stan_03, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
+  as.data.frame() %>% 
+  select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
+  mutate(variable = colnames(X_stan_list_01$X),
+         ix = 1:n()) %>%
+  mutate(variable = fct_reorder(variable, ix, .desc = F))
+
+
+
+betas_level_0_summary_03 %>% 
+  ggplot(aes(x = variable)) +
+  geom_point(aes(y = mean), color = "black") +
+  geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), color = "dark grey") +
+  geom_linerange(aes(ymin = `10%`, ymax = `90%`), color = "black", size = 1) +
+  theme_bw() +
+  xlab("Parameter") +
+  ylab("Value") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+
+
+
+
+
+
+betas_model_01_summary_03 %>% 
+  select(variable, mean, sd) %>% 
+  mutate(model = "model_1") %>% 
+  bind_rows(
+    betas_model_02_summary %>% 
+      select(variable, mean, sd) %>% 
+      mutate(model = "model_2")
+  ) %>% 
+  bind_rows(
+    betas_level_0_summary_03 %>% 
+      select(variable, mean, sd) %>% 
+      mutate(model = "model_3")
+  ) %>% 
+  ggplot(aes(x = variable, color = model)) +
+  geom_point(aes(y = mean), position = position_dodge(width = 0.5)) +
+  geom_linerange(aes(ymin = mean - 2*sd, ymax = mean + 2*sd), position = position_dodge(width = 0.5)) +
+  geom_linerange(aes(ymin = mean - sd, ymax = mean + sd), size = 1, position = position_dodge(width = 0.5)) +
+  theme_bw() +
+  xlab("Beta") +
+  ylab("Value") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+
+
+
+
+
+betas_level_1_summary_03 = summary(model_stan_03, pars = c("beta_level_1"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
+  as.data.frame() %>% 
+  select("mean", "2.5%", "10%", "90%", "97.5%") %>% 
+  mutate(
+    exp = paste0(
+      "Exp ",
+      rep(1:max(count_data_flies$experiment), each = length(colnames(X_stan_list_01$X)))
+    ),
+    variable = rep(colnames(X_stan_list_01$X), max(count_data_flies$experiment))
+  ) %>% 
+  group_by(exp) %>% 
+  mutate(ix = 1:n()) %>%
+  ungroup() %>% 
+  # mutate(variable = paste0(exp, ", ", var)) %>% 
+  mutate(variable = fct_reorder(variable, ix, .desc = T)) 
+
+
+
+betas_level_1_summary_03 %>% 
+  mutate(variable = fct_reorder(variable, ix, .desc = F)) %>% 
+  ggplot(aes(x = variable, color = exp)) +
+  geom_hline(yintercept = 0, size = 0.3) +
+  geom_point(aes(y = mean), position = position_dodge(width = 0.6), size = 0.9) +
+  geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), size = 0.6, position = position_dodge(width = 0.6)) +
+  geom_linerange(aes(ymin = `10%`, ymax = `90%`), size = 0.9, position = position_dodge(width = 0.6)) +
+  theme_bw() +
+  xlab("Parameter") +
+  ylab("Value") +
+  geom_vline(xintercept = 1:36 + 0.5, size = 0.3, color = "black") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+
+
+
+
+
+
+
+
+
+
+
+
+library("rstanarm")
+library("bayesplot")
+library("loo")
+
+
+log_lik_1 <- extract_log_lik(model_stan_01, merge_chains = FALSE)
+r_eff_1 <- relative_eff(exp(log_lik_1), cores = 4) 
+loo_1 <- loo(log_lik_1, r_eff = r_eff_1, cores = 4)
+print(loo_1)
+
+
+
+
+log_lik_3 <- extract_log_lik(model_stan_03, merge_chains = FALSE)
+r_eff_3 <- relative_eff(exp(log_lik_3), cores = 4) 
+loo_3 <- loo(log_lik_3, r_eff = r_eff_3, cores = 4)
+print(loo_3)
+
+
+comp <- loo_compare(loo_1, loo_3)
 
