@@ -4,13 +4,13 @@ library(tidyverse)
 library(ggtern)
 library(here)
 
-source(here("code/european_flies_06_hmnl_1_level_utils.R"))
+source(here("european_fly/code/european_flies_06_hmnl_1_level_utils.R"))
 
-# counts_european = read_csv(here("out/counts_european_choice_format.csv")) %>% 
+# counts_european = read_csv(here("european_fly/out/counts_european_choice_format.csv")) %>% 
 #   filter(experiment != 1) %>% 
 #   mutate(experiment = experiment - 1)
 
-model_stan = readRDS(here("out/european_flies_hmnl_1_level_stan_object_noisdaytime.rds"))
+model_stan = readRDS(here("european_fly/out/european_flies_hmnl_1_level_stan_object_noisdaytime.rds"))
 
 
 

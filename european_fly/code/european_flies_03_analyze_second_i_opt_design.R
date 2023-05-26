@@ -4,7 +4,7 @@ library(here)
 
 
 
-i_opt_design_filename_flies_01 = paste0(here("out/second_i_optimal_design.rds"))
+i_opt_design_filename_flies_01 = paste0(here("european_fly/out/second_i_optimal_design.rds"))
 i_opt_design_flies_01 = readRDS(i_opt_design_filename_flies_01)
 
 
@@ -101,7 +101,7 @@ sort(diag(IM_avg))
 
 
 
-write_csv(design_data_frame, here("out/second_i_optimal_design.csv"))
+write_csv(design_data_frame, here("european_fly/out/second_i_optimal_design.csv"))
 
 
 

@@ -84,7 +84,7 @@ data.frame(
 
 
 
-i_opt_design_filename_flies_01 = paste0(here("out/second_i_optimal_design.rds"))
+i_opt_design_filename_flies_01 = paste0(here("european_fly/out/second_i_optimal_design.rds"))
 
 # Around 22 minutes per iteration
 # Hence, 15 iterations would take around 5.5 hours

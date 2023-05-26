@@ -4,11 +4,11 @@ library(tidyverse)
 library(ggtern)
 library(here)
 
-# counts_european = read_csv(here("out/counts_european_choice_format.csv")) %>% 
+# counts_european = read_csv(here("european_fly/out/counts_european_choice_format.csv")) %>% 
 #   filter(experiment != 1) %>% 
 #   mutate(experiment = experiment - 1)
 
-model_stan = readRDS(here("out/european_flies_hmnl_1_level_stan_object.rds"))
+model_stan = readRDS(here("european_fly/out/european_flies_hmnl_1_level_stan_object.rds"))
 
 
 create_model_matrix_second_order_scheffe = function(df_to_convert){

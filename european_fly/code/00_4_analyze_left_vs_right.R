@@ -1,7 +1,7 @@
 library(tidyverse)
 library(here)
 
-counts_european = read_csv(here("out/counts_european_choice_format.csv"))
+counts_european = read_csv(here("european_fly/out/counts_european_choice_format.csv"))
 
 
 ## Experiment 5

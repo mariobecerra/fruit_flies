@@ -33,5 +33,5 @@ design_df = df_aux %>%
   arrange(choice_set)
 
 
-write.csv(design_df, here("out/design_same_colors_UV.csv"), col.names = F)
+write.csv(design_df, here("european_fly/out/design_same_colors_UV.csv"), col.names = F)
 

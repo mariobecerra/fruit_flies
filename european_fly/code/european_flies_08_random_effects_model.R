@@ -5,9 +5,9 @@ library(here)
 # To stop Stan files from crashing RStudio
 rstan_options(javascript=FALSE)
 
-source(here("code/european_flies_06_hmnl_1_level_utils.R"))
+source(here("european_fly/code/european_flies_06_hmnl_1_level_utils.R"))
 
-counts_european = read_csv(here("out/counts_european_choice_format.csv")) %>% 
+counts_european = read_csv(here("european_fly/out/counts_european_choice_format.csv")) %>% 
   filter(experiment != 1) %>% 
   mutate(experiment = experiment - 1)
 
@@ -38,7 +38,7 @@ counts_european_sample <- images_indices %>%
     is_daytime = ifelse(time_day >= 9 & time_day <= 20, 1, 0) # 1 = 9-20h, 0 = 21-23h + 0-8h
   ) 
 
-saveRDS(counts_european_sample, here("out/european_flies_random_effects_sample.rds"))
+saveRDS(counts_european_sample, here("european_fly/out/european_flies_random_effects_sample.rds"))
 
 
 # Stan data ------------
@@ -152,7 +152,7 @@ Sys.time()
 # 8 hours with 6000 iterations, 6 cores, 50 images per cs, 1468 divergent transitions. Ran out of RAM or something because got error of not being able to allocate vector oZ 6 Gb.
 # Ran again without saving warmup. 7 hours with 6000 iterations and 5000 of warmup, 6 cores, 50 images per cs, 562 divergent transitions.
 model_stan <- stan(
-  file = here("code/european_flies_08_random_effects_model.stan"),
+  file = here("european_fly/code/european_flies_08_random_effects_model.stan"),
   data = stan_data,
   seed = 2023,
   # iter = 1000,  warmup = 500, chains = 4, cores = 4,
@@ -165,12 +165,12 @@ model_stan <- stan(
 
 Sys.time()
 
-saveRDS(model_stan, here("out/european_flies_random_effects_model_stan_object.rds"))
+saveRDS(model_stan, here("european_fly/out/european_flies_random_effects_model_stan_object.rds"))
 
 Sys.time()
 
 # model_stan <- stan(
-#   file = here("code/european_flies_05_hmnl_1_level.stan"),
+#   file = here("european_fly/code/european_flies_05_hmnl_1_level.stan"),
 #   data = stan_data, 
 #   seed = 2023,
 #   iter = 1500,  warmup = 1000, chains = 4, cores = 4)

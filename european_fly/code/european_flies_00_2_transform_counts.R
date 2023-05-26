@@ -3,10 +3,10 @@ library(tidyverse)
 library(here)
 
 
-count_data = read_csv(here('out/counts_european_2023-05-17.csv'))
+count_data = read_csv(here('european_fly/out/counts_european_2023-05-17.csv'))
 
 
-design_mapping = read_csv(here("out/design_mapping_european.csv"))
+design_mapping = read_csv(here("european_fly/out/design_mapping_european.csv"))
 
 # Assume 80 flies per experiment
 n_experiments = max(count_data$experiment)
@@ -87,6 +87,6 @@ merged_all %>%
   filter(!complete.cases(.))
 
 
-write_csv(merged_all, here("out/counts_european_choice_format.csv"))
+write_csv(merged_all, here("european_fly/out/counts_european_choice_format.csv"))
 
 

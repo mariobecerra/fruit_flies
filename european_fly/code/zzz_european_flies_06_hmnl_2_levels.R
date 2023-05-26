@@ -7,7 +7,7 @@ rstan_options(javascript=FALSE)
 
 
 
-counts_european = read_csv(here("out/counts_european_choice_format.csv")) %>% 
+counts_european = read_csv(here("european_fly/out/counts_european_choice_format.csv")) %>% 
   filter(experiment != 1) %>% 
   mutate(experiment = experiment - 1)
 
@@ -144,7 +144,7 @@ stan_data <- list(
 
 # Stan model ------------
 model_stan_lkj <- stan(
-  file = here("code/european_flies_06_hmnl_2_levels.stan"),
+  file = here("european_fly/code/european_flies_06_hmnl_2_levels.stan"),
   data = stan_data, 
   seed = 2023,
   iter = 1500,  warmup = 1000, chains = 1, cores = 4)

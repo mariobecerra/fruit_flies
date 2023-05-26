@@ -26,7 +26,7 @@ design_1_mapping = read_csv(here("data/01 DMela_count_per_image.csv")) %>%
 
 
 
-design_same_colors = read_csv(here("out/design_same_colors_UV_w_intensity.csv")) %>% 
+design_same_colors = read_csv(here("european_fly/out/design_same_colors_UV_w_intensity.csv")) %>% 
   group_by(choice_set) %>% 
   mutate(alternative = 1:n()) %>% 
   ungroup()
@@ -134,7 +134,7 @@ design_1_swapped_mapping2 = read_csv(here("data/mapping_idesign_swapped2.csv"))
 
 
 
-second_i_opt_design_european = read_csv(here("out/second_i_optimal_design.csv")) %>% 
+second_i_opt_design_european = read_csv(here("european_fly/out/second_i_optimal_design.csv")) %>% 
   rename(choice_set = cs) %>% 
   group_by(choice_set) %>% 
   mutate(alternative = 1:n()) %>% 
@@ -197,7 +197,7 @@ design_mapping = design_1_mapping %>%
 
 
 
-write_csv(design_mapping, here("out/design_mapping_european.csv"))
+write_csv(design_mapping, here("european_fly/out/design_mapping_european.csv"))
 
 
 
