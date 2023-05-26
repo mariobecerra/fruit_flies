@@ -1,5 +1,6 @@
-out/*
-data/*
+
+*/out/*
+*/data/*
 *.Rhistory
 .DS_Store
 
