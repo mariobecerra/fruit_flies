@@ -26,7 +26,7 @@ rlkjcorr = function(K, eta = 1)  {
 
 create_model_matrix_second_order_scheffe = function(df_to_convert){
   
-  correct_var_names = c("R", "O", "Y", "G", "B", "P", "UV", "intensity", "is_right", "no_choice")
+  correct_var_names = c("R", "O", "Y", "G", "B", "P", "UV", "intensity", "no_choice")
   # correct_var_names = c("R", "O", "Y", "G", "B", "P", "UV", "intensity", "is_right", "is_daytime", "no_choice")
   
   if(!all.equal(names(df_to_convert), correct_var_names)) {
@@ -52,7 +52,7 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
   
   X_other_vars_nc <- df_to_convert %>% 
     # dplyr::select(all_of(c('no_choice','is_right', 'is_daytime'))) %>%
-    dplyr::select(all_of(c('no_choice','is_right'))) %>%
+    dplyr::select(all_of(c('no_choice'))) %>%
     as.data.frame()
   
   X_main <- df_to_convert %>% 
@@ -91,7 +91,7 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
     mixture_pairwise_interaction_names = mixture_pairwise_interaction_names,
     mixture_intensity_interaction_names = mixture_intensity_interaction_names,
     names_betas_level_1 = names_betas_level_1
-    ))
+  ))
 }
 
 
@@ -149,5 +149,3 @@ create_lattice_design = function(n_var = 3, n_levels = 5, limits = NULL){
 #   
 #   return(lattice_df)
 # }
-
-
