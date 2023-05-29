@@ -24,7 +24,7 @@ images_indices = counts_european %>%
   select(experiment, folder, choice_set, image) %>% 
   distinct() %>% 
   group_by(experiment, folder, choice_set) %>% 
-  slice_sample(n = 5) %>% 
+  slice_sample(n = 10) %>% 
   arrange(experiment, choice_set, image) %>% 
   ungroup()
 
@@ -135,8 +135,13 @@ init_fun <- function() {
 
 
 
-# 1158 seconds with 100 iterations
+# 1158 seconds with 100 iterations and 10 images
 # 1000 transitions using 10 leapfrog steps per transition would take 176 to 210 seconds
+
+# 1733 seconds
+# Gradient evaluation took 0.018667 seconds
+# 1000 transitions using 10 leapfrog steps per transition would take 186.67 seconds.
+# 3 divergent transitions
 model_stan_01 <- stan(
   file = here("european_fly/code/european_flies_09_hmnl_1_level_01.stan"),
   data = stan_data,
@@ -144,8 +149,8 @@ model_stan_01 <- stan(
   # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
   # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
-  iter = 100, chains = 4, cores = 4,
-  # iter = 25, chains = 1,
+  iter = 500, chains = 4, cores = 4,
+  # iter = 5, chains = 1,
   init = init_fun
 )
 
@@ -154,9 +159,14 @@ model_stan_01
 
 
 
-# 1153 seconds with 100 iterations
+# 1153 seconds with 100 iterations and 10 images
 # Gradient evaluation took 0.0179 seconds
 # 1000 transitions using 10 leapfrog steps per transition would take 176 to 210 seconds
+
+# 1768.91 seconds
+# Gradient evaluation took 0.018845 seconds
+# 1000 transitions using 10 leapfrog steps per transition would take 188.45 seconds.
+# 8 divergent transitions
 model_stan_02 <- stan(
   file = here("european_fly/code/european_flies_09_hmnl_1_level_02.stan"),
   data = stan_data,
@@ -164,8 +174,8 @@ model_stan_02 <- stan(
   # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
   # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
-  iter = 100,  chains = 4, cores = 4,
-  # iter = 25, chains = 1,
+  iter = 500,  chains = 4, cores = 4,
+  # iter = 5, chains = 1,
   init = init_fun
 )
 
@@ -177,31 +187,15 @@ model_stan_02
 
 
 
-# 1153 seconds with 100 iterations
-# Gradient evaluation took 0.0209 seconds
-# 1000 transitions using 10 leapfrog steps per transition would take 209 to 220 seconds
-model_stan_02 <- stan(
-  file = here("european_fly/code/european_flies_09_hmnl_1_level_02.stan"),
-  data = stan_data,
-  seed = 2023,
-  # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
-  # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
-  # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
-  iter = 100,  chains = 4, cores = 4,
-  # iter = 25, chains = 1,
-  init = init_fun
-)
 
-model_stan_02
-
-
-
-
-
-
-# 534 seconds with 50 iterations
+# 534 seconds with 50 iterations and 10 images
 # Gradient evaluation took 0.0181 seconds
 # 1000 transitions using 10 leapfrog steps per transition would take 181 to 185 seconds
+
+# 3786.99 seconds
+# Gradient evaluation took 0.017294 seconds
+# 1000 transitions using 10 leapfrog steps per transition would take 172.94 seconds.
+# No divergent transitions
 model_stan_03 <- stan(
   file = here("european_fly/code/european_flies_09_hmnl_1_level_03.stan"),
   data = stan_data,
@@ -209,48 +203,13 @@ model_stan_03 <- stan(
   # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
   # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
-  # iter = 100,  chains = 4, cores = 4,
-  # iter = 25, chains = 1,
-  iter = 50, chains = 4, cores = 4,
+  iter = 500,  chains = 4, cores = 4,
+  # iter = 5, chains = 1,
+  # iter = 50, chains = 4, cores = 4,
   init = init_fun
 )
 
 model_stan_03
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -267,7 +226,79 @@ betas_level_0_summary_01 = summary(model_stan_01, pars = c("beta_level_0"), prob
   select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
   mutate(variable = colnames(X_stan_list$X),
          ix = 1:n()) %>%
-  mutate(variable = fct_reorder(variable, ix, .desc = T))
+  mutate(variable = fct_reorder(variable, ix, .desc = F))
+
+
+
+
+
+betas_level_0_summary_02 = summary(model_stan_02, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
+  as.data.frame() %>% 
+  select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
+  mutate(variable = colnames(X_stan_list$X),
+         ix = 1:n()) %>%
+  mutate(variable = fct_reorder(variable, ix, .desc = F))
+
+
+
+
+
+betas_level_0_summary_03 = summary(model_stan_03, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
+  as.data.frame() %>% 
+  select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
+  mutate(variable = colnames(X_stan_list$X),
+         ix = 1:n()) %>%
+  mutate(variable = fct_reorder(variable, ix, .desc = F)) 
+
+
+
+
+
+
+
+
+
+betas_level_0_summary_01 %>% 
+  mutate(model = "m_01") %>% 
+  bind_rows(
+    betas_level_0_summary_02 %>% 
+      mutate(model = "m_02")
+  ) %>% 
+  bind_rows(
+    betas_level_0_summary_03 %>% 
+      mutate(model = "m_03")
+  ) %>% 
+  ggplot(aes(x = variable, color = model)) +
+  geom_hline(yintercept = 0, size = 0.3) +
+  geom_point(aes(y = mean), position = position_dodge(width = 0.5)) +
+  geom_linerange(aes(ymin = mean - sd, ymax = mean + sd), size = 0.9, position = position_dodge(width = 0.5)) +
+  geom_linerange(aes(ymin = mean - 2*sd, ymax = mean + 2*sd), size = 0.5, position = position_dodge(width = 0.5)) +
+  theme_bw() +
+  xlab("Parameter") +
+  ylab("Value") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 betas_level_0_summary_01 %>% 
   ggplot(aes(x = variable)) +
@@ -375,14 +406,6 @@ diag(Sigma_level_0_posterior_median_01)
 
 
 
-
-betas_level_0_summary_02 = summary(model_stan_02, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
-  as.data.frame() %>% 
-  select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
-  mutate(variable = colnames(X_stan_list$X),
-         ix = 1:n()) %>%
-  mutate(variable = fct_reorder(variable, ix, .desc = T))
-
 betas_level_0_summary_02 %>% 
   ggplot(aes(x = variable)) +
   geom_point(aes(y = mean), color = "black") +
@@ -482,12 +505,6 @@ diag(Sigma_level_0_posterior_median_02)
 
 
 
-betas_level_0_summary_03 = summary(model_stan_03, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
-  as.data.frame() %>% 
-  select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
-  mutate(variable = colnames(X_stan_list$X),
-         ix = 1:n()) %>%
-  mutate(variable = fct_reorder(variable, ix, .desc = F)) 
 
 betas_level_0_summary_03 %>% 
   ggplot(aes(x = variable)) +
@@ -582,26 +599,3 @@ diag(Sigma_level_0_posterior_median_03)
 
 
 
-
-
-
-
-betas_level_0_summary_01 %>% 
-  mutate(model = "m_01") %>% 
-  bind_rows(
-    betas_level_0_summary_02 %>% 
-      mutate(model = "m_02")
-  ) %>% 
-  bind_rows(
-    betas_level_0_summary_03 %>% 
-      mutate(model = "m_03")
-  ) %>% 
-  ggplot(aes(x = variable, color = model)) +
-  geom_hline(yintercept = 0, size = 0.3) +
-  geom_point(aes(y = mean), position = position_dodge(width = 0.5)) +
-  geom_linerange(aes(ymin = mean - sd, ymax = mean + sd), size = 0.9, position = position_dodge(width = 0.5)) +
-  geom_linerange(aes(ymin = mean - 2*sd, ymax = mean + 2*sd), size = 0.5, position = position_dodge(width = 0.5)) +
-  theme_bw() +
-  xlab("Parameter") +
-  ylab("Value") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
