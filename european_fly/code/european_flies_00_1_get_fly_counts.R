@@ -39,7 +39,7 @@ all_counts = lapply(1:length(files_folders), function(i){
       distinct()
     
     out_exp_i = lapply(1:length(subfolders_i), function(j){
-      subfolder_ij = list.files(paste0(files_folders, "/", subfolders_i[j]), full.names = T)[1]
+      subfolder_ij = list.files(paste0(files_folders[i], "/", subfolders_i[j]), full.names = T)[1]
       date_ij = subfolders_i[j]
       subfolders_data_ij = list.files(subfolder_ij, full.names = F)
       

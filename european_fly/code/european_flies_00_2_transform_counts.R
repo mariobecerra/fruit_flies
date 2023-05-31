@@ -3,7 +3,7 @@ library(tidyverse)
 library(here)
 
 
-count_data = read_csv(here('european_fly/out/counts_european_2023-05-17.csv'))
+count_data = read_csv(here('european_fly/out/counts_european_2023-05-31.csv'))
 
 
 design_mapping = read_csv(here("european_fly/out/design_mapping_european.csv"))
