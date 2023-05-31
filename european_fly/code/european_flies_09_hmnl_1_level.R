@@ -24,7 +24,7 @@ images_indices = counts_european %>%
   select(experiment, folder, choice_set, image) %>% 
   distinct() %>% 
   group_by(experiment, folder, choice_set) %>% 
-  slice_sample(n = 5) %>% 
+  slice_sample(n = 50) %>% 
   arrange(experiment, choice_set, image) %>% 
   ungroup()
 
@@ -135,41 +135,106 @@ init_fun <- function() {
 
 
 
-# 1158 seconds with 100 iterations
+
+
+Sys.time()
+# 1158 seconds with 100 iterations and 10 images
 # 1000 transitions using 10 leapfrog steps per transition would take 176 to 210 seconds
+
+
+# 27 hours with 5000 iterations and 50 images (4000 warmup), 6 chains in 6 cores.
+# 10 divergent transitions
+# Although it was running at the same time of another model with 6 cores, so might have been slower because of that.
+# Chain 1: Gradient evaluation took 0.080809 seconds
+# Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 808.09 seconds.
+# 
+# Chain 2: Gradient evaluation took 0.103633 seconds
+# Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 1036.33 seconds.
+# 
+# Chain 3: Gradient evaluation took 0.070737 seconds
+# Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 707.37 seconds.
+# 
+# Chain 4: Gradient evaluation took 0.071202 seconds
+# Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 712.02 seconds.
+# 
+# Chain 5: Gradient evaluation took 0.115092 seconds
+# Chain 5: 1000 transitions using 10 leapfrog steps per transition would take 1150.92 seconds.
+# 
+# Chain 6: Gradient evaluation took 0.105459 seconds
+# Chain 6: 1000 transitions using 10 leapfrog steps per transition would take 1054.59 seconds.
 model_stan_01 <- stan(
   file = here("european_fly/code/european_flies_09_hmnl_1_level_01.stan"),
   data = stan_data,
   seed = 2023,
-  # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
+  iter = 5000,  warmup = 4000, chains = 6, cores = 6,
+  save_warmup = F,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
   # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
-  iter = 100, chains = 4, cores = 4,
+  # iter = 100, chains = 6, cores = 6,
   # iter = 25, chains = 1,
   init = init_fun
 )
 
+Sys.time()
+saveRDS(model_stan_01, "european_fly/out/09_hmnl_1_level_01_stan_object_5000_iter_50_images.rds")
 model_stan_01
 
 
 
 
-# 1153 seconds with 100 iterations
-# Gradient evaluation took 0.0179 seconds
-# 1000 transitions using 10 leapfrog steps per transition would take 176 to 210 seconds
-model_stan_02 <- stan(
-  file = here("european_fly/code/european_flies_09_hmnl_1_level_02.stan"),
+
+
+
+
+# 534 seconds with 50 iterations
+# Gradient evaluation took 0.0181 seconds
+# 1000 transitions using 10 leapfrog steps per transition would take 181 to 185 seconds
+
+
+# ??? hours with 5000 iterations and 50 images (4000 warmup), 6 chains in 6 cores.
+# 10 divergent transitions
+# Chain 1: Gradient evaluation took 0.048389 seconds
+# Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 483.89 seconds.
+# 
+# Chain 2: Gradient evaluation took 0.05093 seconds
+# Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 509.3 seconds.
+# 
+# Chain 3: Gradient evaluation took 0.051514 seconds
+# Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 515.14 seconds.
+# 
+# Chain 4: Gradient evaluation took 0.064938 seconds
+# Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 649.38 seconds.
+# 
+# Chain 5: Gradient evaluation took 0.065467 seconds
+# Chain 5: 1000 transitions using 10 leapfrog steps per transition would take 654.67 seconds.
+# 
+# Chain 6: Gradient evaluation took 0.065957 seconds
+# Chain 6: 1000 transitions using 10 leapfrog steps per transition would take 659.57 seconds.
+
+model_stan_03 <- stan(
+  file = here("european_fly/code/european_flies_09_hmnl_1_level_03.stan"),
   data = stan_data,
   seed = 2023,
-  # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
+  iter = 5000,  warmup = 4000, chains = 6, cores = 6,
+  save_warmup = F,
   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
   # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
-  iter = 100,  chains = 4, cores = 4,
+  # iter = 100, chains = 6, cores = 6,
   # iter = 25, chains = 1,
   init = init_fun
 )
 
-model_stan_02
+Sys.time()
+saveRDS(model_stan_03, "european_fly/out/09_hmnl_1_level_03_stan_object_5000_iter_50_images.rds")
+Sys.time()
+
+model_stan_03
+
+
+
+
+
+
 
 
 
@@ -193,35 +258,6 @@ model_stan_02 <- stan(
 )
 
 model_stan_02
-
-
-
-
-
-
-# 534 seconds with 50 iterations
-# Gradient evaluation took 0.0181 seconds
-# 1000 transitions using 10 leapfrog steps per transition would take 181 to 185 seconds
-model_stan_03 <- stan(
-  file = here("european_fly/code/european_flies_09_hmnl_1_level_03.stan"),
-  data = stan_data,
-  seed = 2023,
-  # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
-  # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
-  # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
-  # iter = 100,  chains = 4, cores = 4,
-  # iter = 25, chains = 1,
-  iter = 50, chains = 4, cores = 4,
-  init = init_fun
-)
-
-model_stan_03
-
-
-
-
-
-
 
 
 
@@ -346,7 +382,7 @@ betas_level_1_summary_01 %>%
 
 
 
-Sigma_level_0_posterior_median_01 = matrix(as.data.frame(summary(model_stan_02, pars = c("Sigma_level_0"), probs = c(0.5))$summary)$`50%`, 
+Sigma_level_0_posterior_median_01 = matrix(as.data.frame(summary(model_stan_01, pars = c("Sigma_level_0"), probs = c(0.5))$summary)$`50%`, 
                                            ncol = stan_data$n_mixture_cols+1)
 
 
