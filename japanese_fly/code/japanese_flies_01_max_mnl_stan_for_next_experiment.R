@@ -6,8 +6,8 @@ library(here)
 rstan_options(javascript=FALSE)
 
 
-design_mapping = read_csv(here("out/design_mapping_japanese.csv"))
-counts = read_csv(here("out/counts_japanese_choice_format.csv")) %>% 
+design_mapping = read_csv(here("japanese_fly/out/design_mapping_japanese.csv"))
+counts = read_csv(here("japanese_fly/out/counts_japanese_choice_format.csv")) %>% 
   filter(experiment == 1)
 
 max_counts = counts %>% 
@@ -208,7 +208,7 @@ model_01_summary = summary(model_stan_01, pars = c("beta"), probs = c(0.5))$summ
   select(variable, mean, sd) 
 
 
-saveRDS(model_01_summary, here("out/japanese_model_mnl_model_1st_experiment.rds"))
+saveRDS(model_01_summary, here("japanese_fly/out/japanese_model_mnl_model_1st_experiment.rds"))
 
 
 

@@ -4,7 +4,7 @@ library(here)
 
 var_names = c("R", "O", "Y", "G", "B", "P", "R*O", "R*Y", "R*G", "R*B", "R*P", "R*UV", "O*Y", "O*G", "O*B", "O*P", "O*UV", "Y*G", "Y*B", "Y*P", "Y*UV", "G*B", "G*P", "G*UV", "B*P", "B*UV", "P*UV", "R*intensity", "O*intensity", "Y*intensity", "G*intensity", "B*intensity", "P*intensity", "UV*intensity", "intensity^2", "no_choice")
 
-model_01_summary = readRDS(here("out/japanese_model_mnl_model_1st_experiment.rds"))
+model_01_summary = readRDS(here("japanese_fly/out/japanese_model_mnl_model_1st_experiment.rds"))
 
 
 beta_values_flies_01 = tibble(
@@ -96,7 +96,7 @@ data.frame(
 
 
 
-i_opt_design_filename_flies_01 = paste0(here("out/second_i_optimal_design_japanese.rds"))
+i_opt_design_filename_flies_01 = paste0(here("japanese_fly/out/second_i_optimal_design_japanese.rds"))
 
 # Around 22 minutes per iteration
 # Hence, 15 iterations would take around 5.5 hours

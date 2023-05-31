@@ -1,9 +1,3 @@
-# Fit 3 models and compare:
-# 1) simple MNL model with all images
-# 2) simple MNL model with the maximum number of flies per choice set
-# 3) Hierarchical MNL model with all images
-# LOO package favors the third model. Also, the uncertainty levels are higher in the third model, the first one has very low uncertainty (probably because of all the images). I compare the high level betas of the HMNL model with the betas of the simple MNL model.
-
 library(rstan)
 library(tidyverse)
 library(here)
@@ -125,7 +119,7 @@ count_data_flies_all = counts %>%
   mutate(
     min_time = min(date_time), 
     max_time = max(date_time)
-    ) %>%  
+  ) %>%  
   mutate(elapsed_mins = difftime(max_time ,min_time, "mins")) %>% 
   filter(date_time > min_time + 0.25*elapsed_mins) %>%  # remove the first 25% of the data (first 5 minutes)
   ungroup()
@@ -276,7 +270,7 @@ betas_model_01_summary = summary(model_stan_01, pars = c("beta"), probs = c(0.02
   mutate(variable = colnames(X_stan_list_01$X),
          ix = 1:n()) %>%
   mutate(variable = fct_reorder(variable, ix, .desc = F))
- 
+
 betas_model_01_summary %>% 
   ggplot(aes(x = variable)) +
   geom_point(aes(y = mean), color = "black") +
@@ -307,6 +301,9 @@ model_01_summary = summary(model_stan_01, pars = c("beta"), probs = c(0.5))$summ
   mutate(variable = colnames(X_stan_01)) %>% 
   select(variable, mean, sd) 
 
+
+saveRDS(model_stan_01, here("japanese_fly/out/japanese_stan_object_mnl_model_2nd_experiment_20_images_per_cs.rds"))
+saveRDS(model_01_summary, here("japanese_fly/out/japanese_model_mnl_model_2nd_experiment_20_images_per_cs.rds"))
 
 
 
@@ -470,6 +467,9 @@ model_02_summary = summary(model_stan_02, pars = c("beta"), probs = c(0.5))$summ
   select(variable, mean, sd) 
 
 
+saveRDS(model_stan_02, here("japanese_fly/out/japanese_stan_object_mnl_model_2nd_experiment_max_counts.rds"))
+saveRDS(model_02_summary, here("japanese_fly/out/japanese_model_mnl_model_2nd_experiment__max_counts.rds"))
+
 
 
 
@@ -538,7 +538,7 @@ Sys.time()
 # 2 hours with 3500 iter (2500 warmup), 1004 divergent transitions after warmup. 
 # 3 hours with 5000 iter (3000 warmup), 1237 divergent transitions after warmup.
 model_stan_03 <- stan(
-  file = here("japanese_fly/code/japanese_flies_04_hmnl.stan"),
+  file = here("japanese_fly/code/japanese_flies_05_hmnl_for_next_experiment.stan"),
   data = stan_data_03,
   seed = 2023,
   # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
@@ -550,6 +550,7 @@ model_stan_03 <- stan(
 
 Sys.time()
 
+saveRDS(model_stan_03, here("japanese_fly/out/japanese_stan_object_hmnl_model_2nd_experiment.rds"))
 
 model_stan_03
 
@@ -579,7 +580,7 @@ betas_level_0_summary_03 %>%
 
 
 
-betas_model_01_summary %>% 
+betas_model_01_summary_03 %>% 
   select(variable, mean, sd) %>% 
   mutate(model = "model_1") %>% 
   bind_rows(
@@ -659,17 +660,6 @@ log_lik_1 <- extract_log_lik(model_stan_01, merge_chains = FALSE)
 r_eff_1 <- relative_eff(exp(log_lik_1), cores = 4) 
 loo_1 <- loo(log_lik_1, r_eff = r_eff_1, cores = 4)
 print(loo_1)
-# Computed from 2000 by 2380 log-likelihood matrix
-# 
-#          Estimate     SE
-# elpd_loo -30630.6  574.7
-# p_loo        75.3    2.8
-# looic     61261.1 1149.4
-# ------
-# Monte Carlo SE of elpd_loo is 0.2.
-# 
-# All Pareto k estimates are good (k < 0.5).
-# See help('pareto-k-diagnostic') for details.
 
 
 
@@ -678,27 +668,7 @@ log_lik_3 <- extract_log_lik(model_stan_03, merge_chains = FALSE)
 r_eff_3 <- relative_eff(exp(log_lik_3), cores = 4) 
 loo_3 <- loo(log_lik_3, r_eff = r_eff_3, cores = 4)
 print(loo_3)
-# Computed from 8000 by 2380 log-likelihood matrix
-# 
-#          Estimate     SE
-# elpd_loo -29019.0  552.7
-# p_loo        65.7    2.0
-# looic     58038.0 1105.4
-# ------
-# Monte Carlo SE of elpd_loo is 0.2.
-# 
-# All Pareto k estimates are good (k < 0.5).
-# See help('pareto-k-diagnostic') for details.
 
 
 comp <- loo_compare(loo_1, loo_3)
-print(comp)
-#        elpd_diff se_diff
-# model2     0.0       0.0
-# model1 -1611.6      69.0
-
-## Favors model 3
-
-
-
 

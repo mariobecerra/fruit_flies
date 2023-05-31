@@ -496,7 +496,7 @@ betas_level_1_summary_02 %>%
 
 
 Sigma_level_0_posterior_median_02 = matrix(as.data.frame(summary(model_stan_02, pars = c("Sigma_level_0"), probs = c(0.5))$summary)$`50%`, 
-                                        ncol = stan_data$n_mixture_cols+1)
+                                           ncol = stan_data$n_mixture_cols+1)
 
 
 

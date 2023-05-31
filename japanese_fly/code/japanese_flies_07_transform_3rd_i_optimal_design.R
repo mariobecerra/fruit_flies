@@ -6,13 +6,13 @@ library(tidyverse)
 library(opdesmixr)
 library(here)
 
-source(here("code/transform_design_function.R"))
+source(here("japanese_fly/code/transform_design_function.R"))
 
 # IMPORT DESIGN --------------------------------------------------------------
-intensity_df <- read_excel(here("data/intensities_thorlabs.xlsx")) %>% 
+intensity_df <- read_excel(here("japanese_fly/data/intensities_thorlabs.xlsx")) %>% 
   as.data.frame()
 
-design_object = readRDS(here("out/japanese_flies_third_i_optimal_design.rds"))
+design_object = readRDS(here("japanese_fly/out/japanese_flies_third_i_optimal_design.rds"))
 
 i_opts = sapply(seq_along(design_object), function(i) design_object[[i]]$opt_crit_value)
 
@@ -31,8 +31,8 @@ transformed_design_list <- transform_design_flies(
 
 
 
-write.csv(transformed_design_list$design_software, here("out/3rd_i_optimal_design_japanese_frank.csv"), row.names = F)
-write.csv(transformed_design_list$design_with_mixture, here("out/3rd_i_optimal_design_japanese_mapping.csv"), row.names = F)
+write.csv(transformed_design_list$design_software, here("japanese_fly/out/3rd_i_optimal_design_japanese_frank.csv"), row.names = F)
+write.csv(transformed_design_list$design_with_mixture, here("japanese_fly/out/3rd_i_optimal_design_japanese_mapping.csv"), row.names = F)
 
 
 

@@ -6,6 +6,12 @@ library(here)
 rstan_options(javascript=FALSE)
 
 
+# Check that experiment number is correct!!!!!!!!!!!
+counts = read_csv(here("japanese_fly/out/counts_japanese_choice_format.csv")) %>% 
+  filter(experiment <= 4)
+
+
+
 
 create_model_matrix_second_order_scheffe = function(df_to_convert){
   
@@ -81,13 +87,6 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
 
 
 
-counts = read_csv(here("japanese_fly/out/counts_japanese_choice_format.csv")) %>% 
-  filter(experiment <= 3)
-
-
-# counts %>% group_by(choice_set) %>% summarize(min_time = min(date_time), max_time = max(date_time)) %>% mutate(elapsed_mins = as.numeric(difftime(max_time ,min_time, "mins"))) 
-
-
 
 count_data_flies_all = counts %>% 
   group_by(choice_set) %>% 
@@ -101,25 +100,25 @@ count_data_flies_all = counts %>%
 
 
 
-# Take subset of images
-set.seed(2023)
-images_indices = count_data_flies_all %>%
-  select(experiment, folder, choice_set, image) %>% 
-  distinct() %>% 
-  group_by(experiment, folder, choice_set) %>% 
-  slice_sample(n = 20) %>% 
-  arrange(experiment, choice_set, image) %>% 
-  ungroup()
-
-
-count_data_flies <- images_indices %>% 
-  left_join(count_data_flies_all) %>% 
-  as.data.frame() %>% 
-  mutate(time_day = as.numeric(substr(as.character(date_time), 12, 13))) %>% 
-  mutate(
-    is_right = ifelse(alternative == "2_right", 1, 0),
-    is_daytime = ifelse(time_day >= 9 & time_day <= 20, 1, 0) # 1 = 9-20h, 0 = 21-23h + 0-8h
-  ) 
+# # Take subset of images
+# set.seed(2023)
+# images_indices = count_data_flies_all %>%
+#   select(experiment, folder, choice_set, image) %>% 
+#   distinct() %>% 
+#   group_by(experiment, folder, choice_set) %>% 
+#   slice_sample(n = 20) %>% 
+#   arrange(experiment, choice_set, image) %>% 
+#   ungroup()
+# 
+# 
+# count_data_flies <- images_indices %>% 
+#   left_join(count_data_flies_all) %>% 
+#   as.data.frame() %>% 
+#   mutate(time_day = as.numeric(substr(as.character(date_time), 12, 13))) %>% 
+#   mutate(
+#     is_right = ifelse(alternative == "2_right", 1, 0),
+#     is_daytime = ifelse(time_day >= 9 & time_day <= 20, 1, 0) # 1 = 9-20h, 0 = 21-23h + 0-8h
+#   ) 
 
 
 
@@ -222,7 +221,7 @@ model {
 }
 "
 
-# 90 seconds for 5000 iterations and 4 chains in 4 cores
+# 110 seconds for 5000 iterations and 4 chains in 4 cores
 model_stan_01 <- stan(
   model_code = model_text_01, 
   data = stan_data_01, 
@@ -234,7 +233,7 @@ model_stan_01 <- stan(
 
 model_stan_01
 
-# saveRDS(model_stan_01, here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_3_stan_object.rds"))
+# saveRDS(model_stan_01, here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_4_stan_object.rds"))
 
 
 betas_model_01_summary = summary(model_stan_01, pars = c("beta"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
@@ -243,7 +242,7 @@ betas_model_01_summary = summary(model_stan_01, pars = c("beta"), probs = c(0.02
          ix = 1:n()) %>%
   mutate(variable = fct_reorder(variable, ix, .desc = F))
 
-saveRDS(betas_model_01_summary, here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_3_betas_summary.rds"))
+saveRDS(betas_model_01_summary, here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_4_betas_summary.rds"))
 
 
 betas_model_01_summary %>% 
@@ -267,6 +266,7 @@ betas_model_01_summary %>%
   xlab("Beta") +
   ylab("Value") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
 
 
 
