@@ -5,11 +5,17 @@ data {
   int<lower=1> n_exp; // Number of experiments
   vector[n_obs] Ny; // counts of the response variable
   matrix[n_obs, n_var] X; // attribute matrix
-  int n_images;
+  int n_images; // Number of images
   int start[n_images]; // the starting observation for each image
   int end[n_images]; // the ending observation for each image
   int exp_index[n_images];
-
+  
+  // priors
+  real tau_level_0_mean;
+  real<lower=0> tau_level_0_sd;
+  real L_Omega_level_0_param;
+  vector[n_var] beta_level_0_mean;
+  vector[n_var] beta_level_0_sd;
 }
 
 parameters {
@@ -21,11 +27,8 @@ parameters {
 }
 
 transformed parameters {
-  matrix[n_var, n_var] Sigma_level_0 = diag_pre_multiply(tau_level_0, L_Omega_level_0) * diag_pre_multiply(tau_level_0, L_Omega_level_0)';
-  
   // reparametrization of beta
   matrix[n_exp, n_var] beta_level_1 = rep_matrix(beta_level_0', n_exp) + z*diag_pre_multiply(tau_level_0, L_Omega_level_0);
-  
 }
 
 model {
@@ -37,28 +40,29 @@ model {
   // if eta > 1, the correlation values in correlation matrices are going to centered around 0. higher eta indicate no correlations (converge to identity correlation matrix).
   // https://yingqijing.medium.com/lkj-correlation-distribution-in-stan-29927b69e9be
   
-  tau_level_0 ~ normal(1, 0.5); 
-  L_Omega_level_0 ~ lkj_corr_cholesky(5);
+  tau_level_0 ~ normal(tau_level_0_mean, tau_level_0_sd); 
+  L_Omega_level_0 ~ lkj_corr_cholesky(L_Omega_level_0_param);
   
-  beta_level_0 ~ normal(0, 2);
+  beta_level_0 ~ normal(beta_level_0_mean, beta_level_0_sd);
   
 
   for(i in 1:n_images){
     utilities = X[start[i]:end[i], 1:n_var]*beta_level_1[exp_index[i]]';
     target += sum(log_softmax(utilities) .* Ny[start[i]:end[i]]);
   }
-  
-  
 }
 
- 
-// // Save log-likelihood for LOO package
-// generated quantities{
-//   vector[n_images] log_lik;
-// 
-//   for(i in 1:n_images){
-//       log_lik[i] = sum(log_softmax(X[start[i]:end[i]]*beta_level_1[exp_index[i]]) .* Ny[start[i]:end[i]]);
-//     }
-// }
-// 
 
+generated quantities{
+  matrix[n_var, n_var] Sigma_level_0 = diag_pre_multiply(tau_level_0, L_Omega_level_0) * diag_pre_multiply(tau_level_0, L_Omega_level_0)';
+  
+  // // Save log-likelihood for LOO package
+  //   vector[n_images] log_lik;
+  // 
+  //   for(i in 1:n_images){
+  //       log_lik[i] = sum(log_softmax(X[start[i]:end[i]]*beta_level_1[exp_index[i]]) .* Ny[start[i]:end[i]]);
+  //     }
+  
+}
+ 
+ 

@@ -2,6 +2,19 @@ library(tidyverse)
 library(rstan)
 library(here)
 
+init_fun <- function() {
+  out_list = list(
+    # tau_level_0 = rep(1, n_mixture_cols+1), 
+    # Omega_level_0 = diag(1, ncol = n_mixture_cols+1, nrow = n_mixture_cols+1)
+    # tau_level_0 = rnorm(n_mixture_cols+1, mean = 1, sd = 0.1), 
+    tau_level_0 = rgamma(n_mixture_cols+1, shape = 4, scale = 0.25),
+    Omega_level_0 = rlkjcorr(K = n_mixture_cols+1, eta = 30),
+    L_Omega_level_0 = chol(rlkjcorr(K = n_mixture_cols+1, eta = 30))
+  )
+  
+  return(out_list)
+}
+
 # To stop Stan files from crashing RStudio
 rstan_options(javascript=FALSE)
 
@@ -119,31 +132,24 @@ stan_data <- list(
   n_obs = nrow(X_stan_list$X),
   Ny = counts_japanese_sample$count,
   X = X_stan_list$X,
-  # experiment = index_dataframe$exp,
-  # choice_set = index_dataframe$choice_set,
-  
   start = index_dataframe_image$start, # the starting observation for each image
   end = index_dataframe_image$end,  # the ending observation for each image
   n_images = nrow(index_dataframe_image),
-  exp_index = index_dataframe_image$exp
+  exp_index = index_dataframe_image$exp,
+  
+  # prior
+  tau_level_0_mean = 1,
+  tau_level_0_sd = 0.5,
+  L_Omega_level_0_param = 5,
+  beta_level_0_mean = rep(0, ncol(X_stan_list$X)),
+  beta_level_0_sd = rep(2, ncol(X_stan_list$X))
 )
 
 
 
 
 
-init_fun <- function() {
-  out_list = list(
-    # tau_level_0 = rep(1, n_mixture_cols+1), 
-    # Omega_level_0 = diag(1, ncol = n_mixture_cols+1, nrow = n_mixture_cols+1)
-    # tau_level_0 = rnorm(n_mixture_cols+1, mean = 1, sd = 0.1), 
-    tau_level_0 = rgamma(n_mixture_cols+1, shape = 4, scale = 0.25),
-    Omega_level_0 = rlkjcorr(K = n_mixture_cols+1, eta = 30),
-    L_Omega_level_0 = chol(rlkjcorr(K = n_mixture_cols+1, eta = 30))
-  )
-  
-  return(out_list)
-}
+
 
 
 
