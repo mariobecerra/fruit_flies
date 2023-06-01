@@ -538,7 +538,7 @@ Sys.time()
 # 2 hours with 3500 iter (2500 warmup), 1004 divergent transitions after warmup. 
 # 3 hours with 5000 iter (3000 warmup), 1237 divergent transitions after warmup.
 model_stan_03 <- stan(
-  file = here("japanese_fly/code/japanese_flies_04_hmnl.stan"),
+  file = here("japanese_fly/code/japanese_flies_test_hmnl.stan"),
   data = stan_data_03,
   seed = 2023,
   # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
