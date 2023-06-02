@@ -21,6 +21,7 @@ parameters {
 }
 
 transformed parameters {
+  // Sigma_level_0 should be moved to the generated quantities section to make code faster
   matrix[n_var, n_var] Sigma_level_0 = diag_pre_multiply(tau_level_0, L_Omega_level_0) * diag_pre_multiply(tau_level_0, L_Omega_level_0)';
   
   // reparametrization of beta
