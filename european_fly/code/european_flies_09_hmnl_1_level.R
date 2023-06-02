@@ -186,13 +186,21 @@ model_stan_01
 
 
 
+
+
+
+
+
+
+
 # 534 seconds with 50 iterations
 # Gradient evaluation took 0.0181 seconds
 # 1000 transitions using 10 leapfrog steps per transition would take 181 to 185 seconds
-
-
-# ??? hours with 5000 iterations and 50 images (4000 warmup), 6 chains in 6 cores.
-# 10 divergent transitions
+#
+#
+# 57 hours with 5000 iterations and 50 images (4000 warmup), 6 chains in 6 cores.
+# 1 divergent transition
+# There were 5275 transitions after warmup that exceeded the maximum treedepth.
 # Chain 1: Gradient evaluation took 0.048389 seconds
 # Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 483.89 seconds.
 # 
@@ -210,7 +218,9 @@ model_stan_01
 # 
 # Chain 6: Gradient evaluation took 0.065957 seconds
 # Chain 6: 1000 transitions using 10 leapfrog steps per transition would take 659.57 seconds.
-
+# 
+# Should move the Sigma to the generated_quantities part instead of transformed parameters for increased efficiency
+# Should also run for less iterations and not save z, tau and Omega.
 model_stan_03 <- stan(
   file = here("european_fly/code/european_flies_09_hmnl_1_level_03.stan"),
   data = stan_data,
@@ -242,27 +252,47 @@ model_stan_03
 
 
 
-# 1153 seconds with 100 iterations
-# Gradient evaluation took 0.0209 seconds
-# 1000 transitions using 10 leapfrog steps per transition would take 209 to 220 seconds
-model_stan_02 <- stan(
-  file = here("european_fly/code/european_flies_09_hmnl_1_level_02.stan"),
-  data = stan_data,
-  seed = 2023,
-  # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
-  # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
-  # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
-  iter = 100,  chains = 4, cores = 4,
-  # iter = 25, chains = 1,
-  init = init_fun
-)
-
-model_stan_02
 
 
 
+dir.create(here("european_fly/out/traceplots/"))
 
 
+suffix = paste0("model_03_5000iter_beta_level_0.png", collapse = "")
+filename = here(paste0("european_fly/out/traceplots/", suffix))
+plot = traceplot(model_stan_03, pars = "beta_level_0")
+ggsave(filename, plot, height = 7, width = 12, units = "in")
+
+# paste0("beta_level_1[", i, ",", 1:36, "]")
+# for(i in 1:8) print(traceplot(model_stan_03, pars = paste0("beta_level_1[", i, ",1]")))
+
+
+for(i in 1:36) {
+  suffix = paste0("model_03_5000iter_Sigma_", i, "_comma_1_to_36", ".png", collapse = "")
+  filename = here(paste0("european_fly/out/traceplots/", suffix))
+  plot = traceplot(model_stan_03, pars = paste0("Sigma_level_0[", i, ",", 1:36, "]"))
+  ggsave(filename, plot, height = 7, width = 12, units = "in")
+}
+
+
+
+for(i in 1:8) {
+  suffix = paste0("model_03_5000iter_beta_level_1_", i, "_comma_1_to_36", ".png", collapse = "")
+  filename = here(paste0("european_fly/out/traceplots/", suffix))
+  plot = traceplot(model_stan_03, pars = paste0("beta_level_1[", i, ",", 1:36, "]"))
+  ggsave(filename, plot, height = 7, width = 12, units = "in")
+}
+
+
+
+library(bayesplot)
+posterior_model_03 <- as.array(model_stan_03)
+color_scheme_set("darkgray")
+np_model_03 = nuts_params(model_stan_03)
+
+
+mcmc_parcoord(posterior_model_03, np = np_model_03, regex_pars = "beta_level_0")
+mcmc_parcoord(posterior_model_03, np = np_model_03, regex_pars = "beta_level_1")
 
 
 
@@ -390,117 +420,45 @@ Sigma_level_0_posterior_median_01 = matrix(as.data.frame(summary(model_stan_01, 
 diag(Sigma_level_0_posterior_median_01)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-betas_level_0_summary_02 = summary(model_stan_02, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
+Sigma_summary_01 = summary(model_stan_01, pars = c("Sigma_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
   as.data.frame() %>% 
   select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
-  mutate(variable = colnames(X_stan_list$X),
-         ix = 1:n()) %>%
-  mutate(variable = fct_reorder(variable, ix, .desc = T))
+  rownames_to_column() %>% 
+  separate(rowname, into = c("name_1", "name_2"), sep = ",", remove = F) %>% 
+  separate(name_1, into = c("name_1_1", "name_1_2"), sep = "\\[", remove = F) %>% 
+  mutate(name_3 = paste0("[", name_1_2, ",", name_2))
 
-betas_level_0_summary_02 %>% 
-  ggplot(aes(x = variable)) +
-  geom_point(aes(y = mean), color = "black") +
-  geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), color = "dark grey") +
-  geom_linerange(aes(ymin = `10%`, ymax = `90%`), color = "black", size = 1) +
-  coord_flip() +
-  theme_bw() +
-  xlab("Parameter") +
-  ylab("Value")
-
-
-
-betas_level_0_summary_02 %>% 
-  mutate(variable = fct_reorder(variable, ix, .desc = F)) %>% 
-  ggplot(aes(x = variable)) +
+Sigma_summary_01 %>% 
+  ggplot(aes(x = name_3)) +
   geom_point(aes(y = mean), color = "black") +
   geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), color = "dark grey") +
   geom_linerange(aes(ymin = `10%`, ymax = `90%`), color = "black", size = 1) +
   theme_bw() +
+  facet_wrap(~name_2, scales = 'free') +
   xlab("Parameter") +
   ylab("Value") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 
 
-names_betas_level_1 = X_stan_list$names_betas_level_1
-
-
-betas_level_1_summary_02 = summary(model_stan_02, pars = c("beta_level_1"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
-  as.data.frame() %>% 
-  select("mean", "2.5%", "10%", "90%", "97.5%") %>% 
-  mutate(
-    exp = paste0(
-      "Exp ",
-      rep(1:n_experiments, each = length(names_betas_level_1))
-    ),
-    variable = rep(names_betas_level_1, n_experiments)
-  ) %>% 
-  group_by(exp) %>% 
-  mutate(ix = 1:n()) %>%
-  ungroup() %>% 
-  # mutate(variable = paste0(exp, ", ", var)) %>% 
-  mutate(variable = fct_reorder(variable, ix, .desc = F)) 
 
 
 
-betas_level_1_summary_02 %>% 
-  ggplot(aes(x = variable)) +
-  geom_point(aes(y = mean), color = "black") +
-  geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), color = "dark grey") +
-  geom_linerange(aes(ymin = `10%`, ymax = `90%`), color = "black", size = 1) +
-  facet_wrap(~exp) +
-  coord_flip() +
-  theme_bw() +
-  xlab("Parameter") +
-  ylab("Value")
 
 
 
-betas_level_1_summary_02 %>% 
-  mutate(variable = fct_reorder(variable, ix, .desc = F)) %>% 
-  ggplot(aes(x = variable, color = exp)) +
-  geom_hline(yintercept = 0, size = 0.3) +
-  geom_point(aes(y = mean), position = position_dodge(width = 0.6), size = 0.5) +
-  geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), size = 0.3, position = position_dodge(width = 0.6)) +
-  geom_linerange(aes(ymin = `10%`, ymax = `90%`), size = 0.7, position = position_dodge(width = 0.6)) +
-  theme_bw() +
-  xlab("Parameter") +
-  ylab("Value") +
-  geom_vline(xintercept = 1:36 + 0.5, size = 0.3, color = "black") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank())
 
 
 
-Sigma_level_0_posterior_median_02 = matrix(as.data.frame(summary(model_stan_02, pars = c("Sigma_level_0"), probs = c(0.5))$summary)$`50%`, 
-                                           ncol = stan_data$n_mixture_cols+1)
 
 
 
-diag(Sigma_level_0_posterior_median_02)
+
+
+
+
+
+
 
 
 
@@ -601,7 +559,7 @@ betas_level_1_summary_03 %>%
 
 
 
-Sigma_level_0_posterior_median_03 = matrix(as.data.frame(summary(model_stan_02, pars = c("Sigma_level_0"), probs = c(0.5))$summary)$`50%`, 
+Sigma_level_0_posterior_median_03 = matrix(as.data.frame(summary(model_stan_03, pars = c("Sigma_level_0"), probs = c(0.5))$summary)$`50%`, 
                                            ncol = stan_data$n_mixture_cols+1)
 
 
@@ -610,6 +568,24 @@ diag(Sigma_level_0_posterior_median_03)
 
 
 
+Sigma_summary_03 = summary(model_stan_03, pars = c("Sigma_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
+  as.data.frame() %>% 
+  select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
+  rownames_to_column() %>% 
+  separate(rowname, into = c("name_1", "name_2"), sep = ",", remove = F) %>% 
+  separate(name_1, into = c("name_1_1", "name_1_2"), sep = "\\[", remove = F) %>% 
+  mutate(name_3 = paste0("[", name_1_2, ",", name_2))
+
+Sigma_summary_03 %>% 
+  ggplot(aes(x = name_3)) +
+  geom_point(aes(y = mean), color = "black") +
+  geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), color = "dark grey") +
+  geom_linerange(aes(ymin = `10%`, ymax = `90%`), color = "black", size = 1) +
+  theme_bw() +
+  facet_wrap(~name_2, scales = 'free') +
+  xlab("Parameter") +
+  ylab("Value") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 
 
@@ -622,15 +598,19 @@ diag(Sigma_level_0_posterior_median_03)
 
 
 
-betas_level_0_summary_01 %>% 
-  mutate(model = "m_01") %>% 
-  bind_rows(
-    betas_level_0_summary_02 %>% 
-      mutate(model = "m_02")
-  ) %>% 
+
+
+dir.create(here("european_fly/out/model_comparison_plots/"))
+
+betas_0_plot = betas_level_0_summary_01 %>% 
+  mutate(model = "non_centered_model") %>% 
+  # bind_rows(
+  #   betas_level_0_summary_02 %>% 
+  #     mutate(model = "m_02")
+  # ) %>% 
   bind_rows(
     betas_level_0_summary_03 %>% 
-      mutate(model = "m_03")
+      mutate(model = "centered_model")
   ) %>% 
   ggplot(aes(x = variable, color = model)) +
   geom_hline(yintercept = 0, size = 0.3) +
@@ -640,4 +620,191 @@ betas_level_0_summary_01 %>%
   theme_bw() +
   xlab("Parameter") +
   ylab("Value") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ggtitle("European flies beta_level_0")
+
+ggsave(here(paste0("european_fly/out/model_comparison_plots/betas_0_cp_vs_ncp_5000iter.png")),
+       betas_0_plot, 
+       height = 7, width = 12, units = "in")
+
+
+
+
+
+
+
+
+betas_1_plot = betas_level_1_summary_01 %>% 
+  mutate(model = "non_centered_model") %>% 
+  # bind_rows(
+  #   betas_level_0_summary_02 %>% 
+  #     mutate(model = "m_02")
+  # ) %>% 
+  bind_rows(
+    betas_level_1_summary_03 %>% 
+      mutate(model = "centered_model")
+  ) %>% 
+  ggplot(aes(x = variable, color = model)) +
+  geom_point(aes(y = mean), size = 1.4, position = position_dodge(width = 0.7)) +
+  geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), 
+                 alpha = 0.7, size = 0.9, 
+                 position = position_dodge(width = 0.7)) +
+  geom_linerange(aes(ymin = `10%`, ymax = `90%`), 
+                 size = 1.2,
+                 position = position_dodge(width = 0.7)) +
+  facet_wrap(~exp, scales = "free_y") +
+  theme_bw() +
+  xlab("Parameter") +
+  ylab("Value") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), legend.position="bottom") +
+  ggtitle("European flies beta_level_1")
+
+ggsave(here(paste0("european_fly/out/model_comparison_plots/betas_1_cp_vs_ncp_5000iter.png")),
+       betas_1_plot, 
+       height = 11, width = 20, units = "in")
+
+
+
+
+
+sigmas_plot = Sigma_summary_01 %>% 
+  mutate(model = "non_centered_model") %>% 
+  # bind_rows(
+  #   betas_level_0_summary_02 %>% 
+  #     mutate(model = "m_02")
+  # ) %>% 
+  bind_rows(
+    Sigma_summary_03 %>% 
+      mutate(model = "centered_model")
+  ) %>% 
+  ggplot(aes(x = name_3, color = model)) +
+  geom_point(aes(y = mean), size = 1.1, position = position_dodge(width = 0.6)) +
+  geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), 
+                 alpha = 0.7, size = 0.7, 
+                 position = position_dodge(width = 0.6)) +
+  geom_linerange(aes(ymin = `10%`, ymax = `90%`), 
+                 size = 1,
+                 position = position_dodge(width = 0.6)) +
+  theme_bw() +
+  facet_wrap(~name_2, scales = 'free') +
+  xlab("Parameter") +
+  ylab("Value") +
+  ggtitle("European flies Sigma") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), legend.position = "bottom")
+
+ggsave(here(paste0("european_fly/out/model_comparison_plots/sigmas_cp_vs_ncp_5000iter.png")),
+       sigmas_plot, 
+       height = 15, width = 30, units = "in")
+
+
+
+
+
+# 
+# # 1153 seconds with 100 iterations
+# # Gradient evaluation took 0.0209 seconds
+# # 1000 transitions using 10 leapfrog steps per transition would take 209 to 220 seconds
+# model_stan_02 <- stan(
+#   file = here("european_fly/code/european_flies_09_hmnl_1_level_02.stan"),
+#   data = stan_data,
+#   seed = 2023,
+#   # iter = 1500,  warmup = 1000, chains = 4, cores = 4,
+#   # iter = 2500,  warmup = 2000, chains = 4, cores = 4,
+#   # iter = 3000,  warmup = 2000, chains = 6, cores = 6,
+#   iter = 100,  chains = 4, cores = 4,
+#   # iter = 25, chains = 1,
+#   init = init_fun
+# )
+# 
+# model_stan_02
+# 
+# 
+# betas_level_0_summary_02 = summary(model_stan_02, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
+#   as.data.frame() %>% 
+#   select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
+#   mutate(variable = colnames(X_stan_list$X),
+#          ix = 1:n()) %>%
+#   mutate(variable = fct_reorder(variable, ix, .desc = T))
+# 
+# betas_level_0_summary_02 %>% 
+#   ggplot(aes(x = variable)) +
+#   geom_point(aes(y = mean), color = "black") +
+#   geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), color = "dark grey") +
+#   geom_linerange(aes(ymin = `10%`, ymax = `90%`), color = "black", size = 1) +
+#   coord_flip() +
+#   theme_bw() +
+#   xlab("Parameter") +
+#   ylab("Value")
+# 
+# 
+# 
+# betas_level_0_summary_02 %>% 
+#   mutate(variable = fct_reorder(variable, ix, .desc = F)) %>% 
+#   ggplot(aes(x = variable)) +
+#   geom_point(aes(y = mean), color = "black") +
+#   geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), color = "dark grey") +
+#   geom_linerange(aes(ymin = `10%`, ymax = `90%`), color = "black", size = 1) +
+#   theme_bw() +
+#   xlab("Parameter") +
+#   ylab("Value") +
+#   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+# 
+# 
+# 
+# names_betas_level_1 = X_stan_list$names_betas_level_1
+# 
+# 
+# betas_level_1_summary_02 = summary(model_stan_02, pars = c("beta_level_1"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
+#   as.data.frame() %>% 
+#   select("mean", "2.5%", "10%", "90%", "97.5%") %>% 
+#   mutate(
+#     exp = paste0(
+#       "Exp ",
+#       rep(1:n_experiments, each = length(names_betas_level_1))
+#     ),
+#     variable = rep(names_betas_level_1, n_experiments)
+#   ) %>% 
+#   group_by(exp) %>% 
+#   mutate(ix = 1:n()) %>%
+#   ungroup() %>% 
+#   # mutate(variable = paste0(exp, ", ", var)) %>% 
+#   mutate(variable = fct_reorder(variable, ix, .desc = F)) 
+# 
+# 
+# 
+# betas_level_1_summary_02 %>% 
+#   ggplot(aes(x = variable)) +
+#   geom_point(aes(y = mean), color = "black") +
+#   geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), color = "dark grey") +
+#   geom_linerange(aes(ymin = `10%`, ymax = `90%`), color = "black", size = 1) +
+#   facet_wrap(~exp) +
+#   coord_flip() +
+#   theme_bw() +
+#   xlab("Parameter") +
+#   ylab("Value")
+# 
+# 
+# 
+# betas_level_1_summary_02 %>% 
+#   mutate(variable = fct_reorder(variable, ix, .desc = F)) %>% 
+#   ggplot(aes(x = variable, color = exp)) +
+#   geom_hline(yintercept = 0, size = 0.3) +
+#   geom_point(aes(y = mean), position = position_dodge(width = 0.6), size = 0.5) +
+#   geom_linerange(aes(ymin = `2.5%`, ymax = `97.5%`), size = 0.3, position = position_dodge(width = 0.6)) +
+#   geom_linerange(aes(ymin = `10%`, ymax = `90%`), size = 0.7, position = position_dodge(width = 0.6)) +
+#   theme_bw() +
+#   xlab("Parameter") +
+#   ylab("Value") +
+#   geom_vline(xintercept = 1:36 + 0.5, size = 0.3, color = "black") +
+#   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+#         panel.grid.major.x = element_blank(),
+#         panel.grid.minor.x = element_blank())
+# 
+# 
+# 
+# Sigma_level_0_posterior_median_02 = matrix(as.data.frame(summary(model_stan_02, pars = c("Sigma_level_0"), probs = c(0.5))$summary)$`50%`, 
+#                                            ncol = stan_data$n_mixture_cols+1)
+# 
+# 
+# 
+# diag(Sigma_level_0_posterior_median_02)
