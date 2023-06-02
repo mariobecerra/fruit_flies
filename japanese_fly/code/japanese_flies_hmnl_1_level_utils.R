@@ -29,7 +29,7 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
   correct_var_names = c("R", "O", "Y", "G", "B", "P", "UV", "intensity", "no_choice")
   # correct_var_names = c("R", "O", "Y", "G", "B", "P", "UV", "intensity", "is_right", "is_daytime", "no_choice")
   
-  if(!all.equal(names(df_to_convert), correct_var_names)) {
+  if(is.character(all.equal(names(df_to_convert), correct_var_names))) {
     stop("Names of df_to_convert must be c(", paste(correct_var_names, collapse = ", "), ")")
   }
   
