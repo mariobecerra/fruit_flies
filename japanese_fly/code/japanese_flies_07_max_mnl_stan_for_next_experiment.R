@@ -8,7 +8,7 @@ rstan_options(javascript=FALSE)
 
 # Check that experiment number is correct!!!!!!!!!!!
 counts = read_csv(here("japanese_fly/out/counts_japanese_choice_format.csv")) %>% 
-  filter(experiment <= 4)
+  filter(experiment <= 7)
 
 
 
@@ -233,7 +233,7 @@ model_stan_01 <- stan(
 
 model_stan_01
 
-# saveRDS(model_stan_01, here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_4_stan_object.rds"))
+# saveRDS(model_stan_01, here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_7_stan_object.rds"))
 
 
 betas_model_01_summary = summary(model_stan_01, pars = c("beta"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
@@ -242,7 +242,7 @@ betas_model_01_summary = summary(model_stan_01, pars = c("beta"), probs = c(0.02
          ix = 1:n()) %>%
   mutate(variable = fct_reorder(variable, ix, .desc = F))
 
-saveRDS(betas_model_01_summary, here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_4_betas_summary.rds"))
+saveRDS(betas_model_01_summary, here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_7_betas_summary.rds"))
 
 
 betas_model_01_summary %>% 

@@ -6,7 +6,7 @@ library(here)
 var_names = c("R", "O", "Y", "G", "B", "P", "R*O", "R*Y", "R*G", "R*B", "R*P", "R*UV", "O*Y", "O*G", "O*B", "O*P", "O*UV", "Y*G", "Y*B", "Y*P", "Y*UV", "G*B", "G*P", "G*UV", "B*P", "B*UV", "P*UV", "R*intensity", "O*intensity", "Y*intensity", "G*intensity", "B*intensity", "P*intensity", "UV*intensity", "intensity^2", "no_choice")
 
 
-model_01_summary = readRDS(here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_4_betas_summary.rds"))
+model_01_summary = readRDS(here("japanese_fly/out/japanese_max_mnl_model_experiments_1_to_7_betas_summary.rds"))
 
 beta_values_flies_01 = tibble(
   var = var_names
