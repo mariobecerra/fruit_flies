@@ -12,7 +12,7 @@ source(here("japanese_fly/code/transform_design_function.R"))
 intensity_df <- read_excel(here("japanese_fly/data/intensities_thorlabs.xlsx")) %>% 
   as.data.frame()
 
-design_object = readRDS(here("japanese_fly/out/japanese_flies_third_i_optimal_design.rds"))
+design_object = readRDS(here("japanese_fly/out/japanese_flies_4th_i_optimal_design.rds"))
 
 i_opts = sapply(seq_along(design_object), function(i) design_object[[i]]$opt_crit_value)
 
