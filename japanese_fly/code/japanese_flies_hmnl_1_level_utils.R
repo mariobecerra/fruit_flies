@@ -65,6 +65,7 @@ create_model_matrix_second_order_scheffe = function(df_to_convert){
   #   set_names(mixture_pairwise_interaction_names)
   
   X_color_pairwise = combn(seq_along(mixture_variable_names), 2, function(x) X_main[, x[1]]*X_main[, x[2]], simplify = T) %>% 
+    matrix(ncol = length(mixture_pairwise_interaction_names)) %>% 
     as.data.frame() %>% 
     set_names(mixture_pairwise_interaction_names)
   
@@ -117,13 +118,20 @@ create_lattice_design = function(n_var = 3, n_levels = 5, limits = NULL){
   }
   
   lattice_df = lapply(1:n_var, function(i){
-    tibble(x = seq(limits[1, i], limits[2, i], length.out = n_levels)) %>% 
-      set_names(paste0("x", i))
+    if(limits[1, i] != limits[2, i]){
+      out = tibble(x = seq(limits[1, i], limits[2, i], length.out = n_levels)) %>% 
+        set_names(paste0("x", i))
+    } else{
+      out = tibble(x = limits[1, i]) %>% 
+        set_names(paste0("x", i))
+    }
+    return(out)
   }) %>% 
     bind_cols() %>% 
     expand.grid() %>% 
     as_tibble() %>% 
-    slice(which(abs(apply(., 1, sum) - 1) < 1e-12))
+    distinct() %>% 
+    slice(which(abs(apply(., 1, sum) - 1) < 1e-15))
   
   return(lattice_df)
 }
