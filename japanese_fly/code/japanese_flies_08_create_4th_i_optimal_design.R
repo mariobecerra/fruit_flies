@@ -99,6 +99,7 @@ i_opt_design_filename_flies_01 = paste0(here("japanese_fly/out/japanese_flies_4t
 # Around 20 minutes per iteration
 # Hence, 15 iterations would take around 5 hours
 # And, 20 iterations would take around 6.7 hours
+# 6 initial designs with 25 iterations on 4 cores (should have been 6) on the HP machine took 9.3 hours
 if(file.exists(i_opt_design_filename_flies_01)){
   cat("I_B optimal design already exists.\n")
   i_opt_design_flies_01 = readRDS(i_opt_design_filename_flies_01)
@@ -106,7 +107,7 @@ if(file.exists(i_opt_design_filename_flies_01)){
   cat("Doing I_B optimal design for insect experiment.\n")
   (t1I = Sys.time())
   i_opt_design_flies_01 =  mnl_mixture_coord_exch(
-    n_random_starts = 4,
+    n_random_starts = 6,
     q = q_flies_01, 
     J = J_flies_01, 
     S = S_flies_01, 
@@ -116,7 +117,7 @@ if(file.exists(i_opt_design_filename_flies_01)){
     transform_beta = F,
     opt_method = "B",
     opt_crit = "I",
-    max_it = 20,
+    max_it = 25,
     verbose = 1,
     plot_designs = F,
     seed = 2023,
