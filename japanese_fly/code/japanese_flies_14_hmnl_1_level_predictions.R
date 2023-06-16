@@ -7,7 +7,7 @@ library(here)
 source(here("japanese_fly/code/japanese_flies_hmnl_1_level_utils.R"))
 
 
-model_stan = readRDS(here("japanese_fly/out/japanese_hmnl_model_experiments_1_to_7_stan_object_30images.rds"))
+model_stan = readRDS(here("japanese_fly/out/japanese_hmnl_model_experiments_1_to_8_stan_object_30images.rds"))
 
 beta_level_0_draws_hmnl = rstan::extract(model_stan, "beta_level_0")
 beta_level_1_draws_hmnl = rstan::extract(model_stan, "beta_level_1")
@@ -18,45 +18,45 @@ n_draws = nrow(beta_level_0_draws_hmnl[[1]])
 
 names_betas_level_0 = c("R", "O", "Y", "G", "B", "P", "R*O", "R*Y", "R*G", "R*B", "R*P", "R*UV", "O*Y", "O*G", "O*B", "O*P", "O*UV", "Y*G", "Y*B", "Y*P", "Y*UV", "G*B", "G*P", "G*UV", "B*P", "B*UV", "P*UV", "R*intensity", "O*intensity", "Y*intensity", "G*intensity", "B*intensity", "P*intensity", "UV*intensity", "intensity^2", "no_choice")
 
-betas_level_0_summary = summary(model_stan, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
-  as.data.frame() %>% 
-  select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>% 
+betas_level_0_summary = summary(model_stan, pars = c("beta_level_0"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>%
+  as.data.frame() %>%
+  select("mean", "sd", "2.5%", "10%", "90%", "97.5%") %>%
   mutate(variable = names_betas_level_0,
          ix = 1:n()) %>%
-  mutate(variable = fct_reorder(variable, ix, .desc = T))
+  mutate(variable = fct_reorder(variable, ix, .desc = F))
 
 
 
 n_experiments = dim(beta_level_1_draws_hmnl[[1]])[2]
 
-betas_level_1_summary = summary(model_stan, pars = c("beta_level_1"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>% 
-  as.data.frame() %>% 
-  select("mean","sd", "2.5%", "10%", "90%", "97.5%") %>% 
+betas_level_1_summary = summary(model_stan, pars = c("beta_level_1"), probs = c(0.025, 0.1, 0.5, 0.9, 0.975))$summary %>%
+  as.data.frame() %>%
+  select("mean","sd", "2.5%", "10%", "90%", "97.5%") %>%
   mutate(
     exp = paste0(
       "Exp ",
       rep(1:n_experiments, each = length(names_betas_level_0))
     ),
     variable = rep(names_betas_level_0, n_experiments)
-  ) %>% 
-  group_by(exp) %>% 
+  ) %>%
+  group_by(exp) %>%
   mutate(ix = 1:n()) %>%
-  ungroup() %>% 
-  # mutate(variable = paste0(exp, ", ", var)) %>% 
+  ungroup() %>%
+  # mutate(variable = paste0(exp, ", ", var)) %>%
   mutate(variable = fct_reorder(variable, ix, .desc = F))
 
 
 
 
-betas_level_0_summary %>% 
-  mutate(exp = "All experiments", line_thickness_1 = 2, line_thickness_2 = 1) %>% 
-  bind_rows(betas_level_1_summary %>% 
-              mutate(line_thickness_1 = 0.8, line_thickness_2 = 0.5)) %>% 
+betas_level_0_summary %>%
+  mutate(exp = "All experiments", line_thickness_1 = 2, line_thickness_2 = 1) %>%
+  bind_rows(betas_level_1_summary %>%
+              mutate(line_thickness_1 = 0.8, line_thickness_2 = 0.5)) %>%
   ggplot(aes(x = variable, color = exp)) +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = 0, size = 0.3) +
   geom_point(aes(y = mean), position = position_dodge(width = 0.7), size = 0.9) +
-  geom_linerange(aes(ymin = mean - 2*sd, ymax = mean + 2*sd, size = line_thickness_2), 
+  geom_linerange(aes(ymin = mean - 2*sd, ymax = mean + 2*sd, size = line_thickness_2),
                  position = position_dodge(width = 0.7), show.legend = FALSE) +
   geom_linerange(aes(ymin = mean - sd, ymax = mean + sd, size = line_thickness_1),
                  position = position_dodge(width = 0.7), show.legend = FALSE) +
@@ -70,13 +70,59 @@ betas_level_0_summary %>%
   ggtitle(paste0("Japanese fly betas of experiments 1 to ", n_experiments)) +
   scale_size_continuous(range = c(0.5, 2)) +
   scale_color_manual(values = c("red", "#381532", "#4b1b42", "#5d2252", "#702963",
-                                "#833074", "#953784", "#a83e95"))
+                                "#833074", "#953784", "#a83e95", "black"))
+
+
+
+betas_level_0_summary %>%
+  mutate(exp = "All experiments", line_thickness_1 = 2, line_thickness_2 = 1) %>%
+  bind_rows(betas_level_1_summary %>%
+              mutate(line_thickness_1 = 0.8, line_thickness_2 = 0.5)) %>%
+  ggplot(aes(x = variable, color = exp)) +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = 0, size = 0.3) +
+  geom_point(aes(y = mean), position = position_dodge(width = 0.7), size = 0.9) +
+  geom_linerange(aes(ymin = mean - 2*sd, ymax = mean + 2*sd, size = line_thickness_2),
+                 position = position_dodge(width = 0.7), show.legend = FALSE) +
+  geom_linerange(aes(ymin = mean - sd, ymax = mean + sd, size = line_thickness_1),
+                 position = position_dodge(width = 0.7), show.legend = FALSE) +
+  theme_bw() +
+  xlab("Parameter") +
+  ylab("Value") +
+  geom_vline(xintercept = 1:36 + 0.5, size = 0.3, color = "black") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  ggtitle(paste0("Japanese fly betas of experiments 1 to ", n_experiments)) +
+  scale_size_continuous(range = c(0.5, 2)) +
+  scale_color_manual(values = c("black", rep("dark gray", n_experiments)))
+
+
+
+betas_level_0_summary %>%
+  mutate(exp = "All experiments") %>%
+  bind_rows(betas_level_1_summary) %>%
+  ggplot(aes(x = variable, color = exp)) +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = 0, size = 0.3) +
+  geom_point(aes(y = mean), position = position_dodge(width = 0.8), size = 0.7) +
+  geom_linerange(aes(ymin = mean - 2*sd, ymax = mean + 2*sd), size = 0.6,
+                 position = position_dodge(width = 0.8), show.legend = FALSE) +
+  theme_bw() +
+  xlab("Parameter") +
+  ylab("Value") +
+  geom_vline(xintercept = 1:36 + 0.5, size = 0.3, color = "black") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  ggtitle(paste0("Japanese fly betas of experiments 1 to ", n_experiments)) +
+  # scale_size_continuous(range = c(0.5, 1)) +
+  scale_color_manual(values = c("black", rep("dark gray", n_experiments)))
 
 
 
 
-
-betas_level_1_summary %>% 
+betas_level_1_summary %>%
   ggplot(aes(x = variable)) +
   geom_hline(yintercept = 0) +
   geom_point(aes(y = mean), color = "black") +
@@ -91,7 +137,7 @@ betas_level_1_summary %>%
 
 
 
-betas_level_1_summary %>% 
+betas_level_1_summary %>%
   ggplot(aes(x = variable, color = exp)) +
   geom_hline(yintercept = 0) +
   geom_hline(yintercept = 0, size = 0.3) +
@@ -113,41 +159,41 @@ betas_level_1_summary %>%
 create_level_1_betas_hmnl = function(
   beta_level_0_draws_hmnl, Sigma_level_0_draws_hmnl, n_draws_per_posterior_sample = 1,
   seed = NULL){
-  
+
   n_draws = nrow(beta_level_0_draws_hmnl[[1]])
-  
+
   # Proper predictive
   betas_level_1_hmnl = matrix(0.0, nrow = n_draws_per_posterior_sample*n_draws, ncol = ncol(beta_level_0_draws_hmnl[[1]]))
-  
+
   if(!is.null(seed)) set.seed(seed = seed)
-  
+
   counter = 1
   for(d in 1:n_draws){
     Sigma_level_0_d = Sigma_level_0_draws_hmnl[[1]][d, , ]
     beta_level_0_d = beta_level_0_draws_hmnl[[1]][d, ]
     beta_level_1_d = mvrnorm(n_draws_per_posterior_sample, beta_level_0_d, Sigma_level_0_d)
-    
+
     betas_level_1_hmnl[counter:(counter + n_draws_per_posterior_sample - 1), ] = beta_level_1_d
-    
+
     counter = counter + n_draws_per_posterior_sample
   }
-  
+
   return(betas_level_1_hmnl)
-  
+
 }
 
 
 
 predict_utilities_design = function(
-  df_to_predict, 
+  df_to_predict,
   beta_level_1_draws_hmnl = NULL,
-  beta_level_0_draws_hmnl = NULL, 
+  beta_level_0_draws_hmnl = NULL,
   Sigma_level_0_draws_hmnl = NULL,
   n_draws_per_posterior_sample = NULL,
-  include_all_utilities = T, 
+  include_all_utilities = T,
   seed = NULL
 ){
-  
+
   # Example of how to use by generating the beta_level_1 on the fly
   # predicted_utilities_df_01 = predict_utilities_design(
   #   df_to_predict = df_to_predict_01,
@@ -157,50 +203,50 @@ predict_utilities_design = function(
   #   n_draws_per_posterior_sample = 10,
   #   seed = 2023
   # )
-  
+
   # Example of how to use with a matrix of precomputed betas_level_1
   # beta_level_1_draws_hmnl_10samples = create_level_1_betas_hmnl(
   #   beta_level_0_draws_hmnl, Sigma_level_0_draws_hmnl, n_draws_per_posterior_sample = 10,
   #   seed = 2023
   # )
-  # 
+  #
   # predicted_utilities_df_01 = predict_utilities_design(
-  #   df_to_predict = df_to_predict_01, 
+  #   df_to_predict = df_to_predict_01,
   #   beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
   #   include_all_utilities = F
   # )
-  
+
   X_to_predict_list <- create_model_matrix_second_order_scheffe(df_to_predict)
-  
+
   if(!is.null(beta_level_1_draws_hmnl)){
-    
+
     if(!is.null(beta_level_0_draws_hmnl)) warning("beta_level_0_draws_hmnl provided but ignored")
     if(!is.null(Sigma_level_0_draws_hmnl)) warning("Sigma_level_0_draws_hmnl provided but ignored")
     if(!is.null(n_draws_per_posterior_sample)) warning("n_draws_per_posterior_sample provided but ignored")
-    
+
     n_draws = nrow(beta_level_1_draws_hmnl)
     utilities_post = matrix(0.0, ncol = n_draws, nrow = nrow(X_to_predict_list$X))
-    
+
     for(d in 1:n_draws){
       beta_level_1 = beta_level_1_draws_hmnl[d,]
       utilities_d = X_to_predict_list$X %*% beta_level_1
       utilities_post[, d] = utilities_d
     }
-    
-    
-    
+
+
+
   } else{
-    
+
     n_draws = nrow(beta_level_0_draws_hmnl[[1]])
     utilities_post = matrix(0.0, ncol = n_draws_per_posterior_sample*n_draws, nrow = nrow(X_to_predict_list$X))
-    
+
     counter = 1
     if(!is.null(seed)) set.seed(seed = seed)
     for(d in 1:n_draws){
       Sigma_level_0_d = Sigma_level_0_draws_hmnl[[1]][d, , ]
       beta_level_0_d = beta_level_0_draws_hmnl[[1]][d, ]
       beta_level_1 = mvrnorm(n_draws_per_posterior_sample, beta_level_0_d, Sigma_level_0_d)
-      
+
       if(n_draws_per_posterior_sample > 1){
         for(i in 1:n_draws_per_posterior_sample){
           utilities_d = X_to_predict_list$X %*% beta_level_1[i, ]
@@ -208,26 +254,26 @@ predict_utilities_design = function(
       } else{
         utilities_d = X_to_predict_list$X %*% beta_level_1
       }
-      
-      
-      
+
+
+
       utilities_post[, counter:(counter + n_draws_per_posterior_sample - 1)] = utilities_d
       counter = counter + n_draws_per_posterior_sample
     }
-    
+
   } # end if
-  
-  
+
+
   quantiles_utilities = t(apply(utilities_post, 1, function(x) c(quantile(x, probs = c(0.1, 0.5, 0.9)), sd = sd(x)) ))
-  
-  
-  out_utilities_summary = df_to_predict %>% 
-    mutate(order_original = 1:n()) %>% 
-    bind_cols(quantiles_utilities %>% 
-                as_tibble() %>% 
+
+
+  out_utilities_summary = df_to_predict %>%
+    mutate(order_original = 1:n()) %>%
+    bind_cols(quantiles_utilities %>%
+                as_tibble() %>%
                 set_names(c("p10", "p50", "p90", "sd")))
-  
-  
+
+
   if(include_all_utilities){
     out = list(
       utilities_summary = out_utilities_summary,
@@ -238,9 +284,9 @@ predict_utilities_design = function(
       utilities_summary = out_utilities_summary
     )
   }
-  
+
   return(out)
-  
+
 }
 
 
@@ -262,35 +308,35 @@ beta_level_1_draws_hmnl_10samples = create_level_1_betas_hmnl(
 
 
 
-lattice_design_7_ing_01 = create_lattice_design(n_var = 7, n_levels = 7) %>% 
+lattice_design_7_ing_01 = create_lattice_design(n_var = 7, n_levels = 7) %>%
   set_names(c('R','O','Y','G','B','P', 'UV'))
 
 
 df_to_predict_01 = expand_grid(
-  lattice_design_7_ing_01, 
+  lattice_design_7_ing_01,
   intensity = seq(-1, 1, by = 0.2),
   no_choice = 0
-) 
+)
 
 
 predicted_utilities_df_01 = predict_utilities_design(
-  df_to_predict = df_to_predict_01, 
+  df_to_predict = df_to_predict_01,
   beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
   include_all_utilities = F
 )
 
 
 
-predicted_utilities_df_01$utilities_summary %>% 
+predicted_utilities_df_01$utilities_summary %>%
   arrange(desc(p50))
 
 
 
-predicted_utilities_df_01$utilities_summary %>% 
-  top_n(100, p50) %>% 
-  arrange(desc(p50)) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+predicted_utilities_df_01$utilities_summary %>%
+  top_n(100, p50) %>%
+  arrange(desc(p50)) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point() +
   geom_linerange(aes(ymin = p10, ymax = p90)) +
@@ -298,11 +344,11 @@ predicted_utilities_df_01$utilities_summary %>%
 
 
 # Sample 10000 points to see utilities and posterior intervals
-predicted_utilities_df_01$utilities_summary %>% 
-  sample_n(10000) %>% 
-  arrange(desc(p50)) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+predicted_utilities_df_01$utilities_summary %>%
+  sample_n(10000) %>%
+  arrange(desc(p50)) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point(size = 0.05) +
   geom_linerange(aes(ymin = p10, ymax = p90), linewidth = 0.1, alpha = 0.6) +
@@ -310,15 +356,15 @@ predicted_utilities_df_01$utilities_summary %>%
 
 
 # Best vs worst
-predicted_utilities_df_01$utilities_summary %>% 
-  top_n(500, p50) %>% 
+predicted_utilities_df_01$utilities_summary %>%
+  top_n(500, p50) %>%
   bind_rows(
-    predicted_utilities_df_01$utilities_summary %>% 
+    predicted_utilities_df_01$utilities_summary %>%
       top_n(-500, p50)
-  ) %>% 
-  arrange(desc(p50)) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+  ) %>%
+  arrange(desc(p50)) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point(size = 0.1) +
   geom_linerange(aes(ymin = p10, ymax = p90), linewidth = 0.4, alpha = 0.7) +
@@ -328,19 +374,19 @@ predicted_utilities_df_01$utilities_summary %>%
 
 
 # Top 20 mixture values
-top_20_mixtures_01 = predicted_utilities_df_01$utilities_summary %>% 
-  arrange(desc(p50)) %>% 
-  select(R, O, Y, G, B, P, UV) %>% 
-  distinct() %>% 
-  head(20) %>% 
-  as.data.frame() 
+top_20_mixtures_01 = predicted_utilities_df_01$utilities_summary %>%
+  arrange(desc(p50)) %>%
+  select(R, O, Y, G, B, P, UV) %>%
+  distinct() %>%
+  head(20) %>%
+  as.data.frame()
 
 
-top_20_mixtures_01_min = top_20_mixtures_01 %>% 
+top_20_mixtures_01_min = top_20_mixtures_01 %>%
   apply(., 2, min)
 
 
-top_20_mixtures_01_max = top_20_mixtures_01 %>% 
+top_20_mixtures_01_max = top_20_mixtures_01 %>%
   apply(., 2, max)
 
 
@@ -353,9 +399,9 @@ top_20_mixtures_01_max
 
 # More granular around the best values predicted in previous step
 lattice_design_7_ing_02 = create_lattice_design(
-  n_var = 7, n_levels = 7, 
+  n_var = 7, n_levels = 6,
   limits = rbind(top_20_mixtures_01_min, top_20_mixtures_01_max)
-) %>% 
+) %>%
   set_names(c('R','O','Y','G','B','P', 'UV'))
 
 
@@ -364,32 +410,33 @@ lattice_design_7_ing_02 = create_lattice_design(
 
 
 df_to_predict_02 = expand_grid(
-  lattice_design_7_ing_02, 
+  lattice_design_7_ing_02,
   intensity = seq(-1, 1, by = 0.1),
   no_choice = 0
-) 
+)
 
 
 # 78 seconds with 600 samples, 10 draws per sample, and 67K rows in df_to_predict
 # 20 seconds with 1200 samples, 10 draws per sample, and 11K rows in df_to_predict
+# 73 seconds with 1800 samples, 10 draws per sample, and 24K rows in df_to_predict
 Sys.time()
 predicted_utilities_df_02 = predict_utilities_design(
-  df_to_predict = df_to_predict_02, 
+  df_to_predict = df_to_predict_02,
   beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
   include_all_utilities = F
 )
 Sys.time()
 
 
-predicted_utilities_df_02$utilities_summary %>% 
+predicted_utilities_df_02$utilities_summary %>%
   arrange(desc(p50))
 
 
-predicted_utilities_df_02$utilities_summary %>% 
-  top_n(100, p50) %>% 
-  arrange(desc(p50)) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+predicted_utilities_df_02$utilities_summary %>%
+  top_n(100, p50) %>%
+  arrange(desc(p50)) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point() +
   geom_linerange(aes(ymin = p10, ymax = p90)) +
@@ -397,11 +444,11 @@ predicted_utilities_df_02$utilities_summary %>%
 
 
 # Sample 6000 points to see utilities and posterior intervals
-predicted_utilities_df_02$utilities_summary %>% 
-  sample_n(6000) %>% 
-  arrange(desc(p50)) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+predicted_utilities_df_02$utilities_summary %>%
+  sample_n(6000) %>%
+  arrange(desc(p50)) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point(size = 0.05) +
   geom_linerange(aes(ymin = p10, ymax = p90), linewidth = 0.2, alpha = 0.7) +
@@ -409,15 +456,15 @@ predicted_utilities_df_02$utilities_summary %>%
 
 
 # Best vs worst
-predicted_utilities_df_02$utilities_summary %>% 
-  top_n(500, p50) %>% 
+predicted_utilities_df_02$utilities_summary %>%
+  top_n(500, p50) %>%
   bind_rows(
-    predicted_utilities_df_02$utilities_summary %>% 
+    predicted_utilities_df_02$utilities_summary %>%
       top_n(-500, p50)
-  ) %>% 
-  arrange(desc(p50)) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+  ) %>%
+  arrange(desc(p50)) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point(size = 0.1) +
   geom_linerange(aes(ymin = p10, ymax = p90), linewidth = 0.4, alpha = 0.7) +
@@ -426,19 +473,19 @@ predicted_utilities_df_02$utilities_summary %>%
 
 
 # Top 20 mixture values
-top_20_mixtures_02 = predicted_utilities_df_02$utilities_summary %>% 
-  arrange(desc(p50)) %>% 
-  select(R, O, Y, G, B, P, UV) %>% 
-  distinct() %>% 
-  head(20) %>% 
-  as.data.frame() 
+top_20_mixtures_02 = predicted_utilities_df_02$utilities_summary %>%
+  arrange(desc(p50)) %>%
+  select(R, O, Y, G, B, P, UV) %>%
+  distinct() %>%
+  head(20) %>%
+  as.data.frame()
 
 
-top_20_mixtures_02_min = top_20_mixtures_02 %>% 
+top_20_mixtures_02_min = top_20_mixtures_02 %>%
   apply(., 2, min)
 
 
-top_20_mixtures_02_max = top_20_mixtures_02 %>% 
+top_20_mixtures_02_max = top_20_mixtures_02 %>%
   apply(., 2, max)
 
 
@@ -451,17 +498,25 @@ top_20_mixtures_02_max
 
 # More granular around the best values predicted in previous step
 lattice_design_7_ing_02 = create_lattice_design(
-  n_var = 7, n_levels = 8, 
+  n_var = 7, n_levels = 8,
   limits = rbind(top_20_mixtures_02_min, top_20_mixtures_02_max)
-) %>% 
+) %>%
   set_names(c('R','O','Y','G','B','P', 'UV'))
 
 
 
-df_to_predict_03 = lattice_design_7_ing_02 %>% 
+best_intensities_02 = predicted_utilities_df_02$utilities_summary %>%
+  arrange(desc(p50)) %>% 
+  head(50) %>% 
+  pull(intensity) %>% 
+  unique()
+
+
+
+df_to_predict_03 = lattice_design_7_ing_02 %>%
   expand_grid(
     .,
-    intensity = seq(-1, 1, by = 0.05), 
+    intensity = seq(min(best_intensities_02), 1, by = 0.05),
     no_choice = 0
   )
 
@@ -470,27 +525,28 @@ df_to_predict_03 = lattice_design_7_ing_02 %>%
 
 # 34 seconds with 600 samples, 10 draws per sample, and 20K rows in df_to_predict
 # 90 seconds with 1200 samples, 10 draws per sample, and 37K rows in df_to_predict
+# 180 seconds with 1800 samples, 10 draws per sample, and 36K rows in df_to_predict
 Sys.time()
 predicted_utilities_df_03 = predict_utilities_design(
-  df_to_predict = df_to_predict_03, 
+  df_to_predict = df_to_predict_03,
   beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
   include_all_utilities = F
 )
 Sys.time()
 
 
-predicted_utilities_df_03$utilities_summary %>% 
+predicted_utilities_df_03$utilities_summary %>%
   arrange(desc(p50))
 
 
 
 
 
-predicted_utilities_df_03$utilities_summary %>% 
-  top_n(100, p50) %>% 
-  arrange(desc(p50)) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+predicted_utilities_df_03$utilities_summary %>%
+  top_n(100, p50) %>%
+  arrange(desc(p50)) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point() +
   geom_linerange(aes(ymin = p10, ymax = p90)) +
@@ -498,15 +554,15 @@ predicted_utilities_df_03$utilities_summary %>%
 
 
 
-predicted_utilities_df_03$utilities_summary %>% 
-  top_n(200, p50) %>% 
+predicted_utilities_df_03$utilities_summary %>%
+  top_n(200, p50) %>%
   bind_rows(
-    predicted_utilities_df_03$utilities_summary %>% 
+    predicted_utilities_df_03$utilities_summary %>%
       top_n(-200, p50)
-  ) %>% 
-  arrange(desc(p50)) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+  ) %>%
+  arrange(desc(p50)) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point() +
   geom_linerange(aes(ymin = p10, ymax = p90)) +
@@ -515,19 +571,19 @@ predicted_utilities_df_03$utilities_summary %>%
 
 
 # Top 20 mixture values
-top_20_mixtures_03 = predicted_utilities_df_03$utilities_summary %>% 
-  arrange(desc(p50)) %>% 
-  select(R, O, Y, G, B, P, UV) %>% 
-  distinct() %>% 
-  head(20) %>% 
-  as.data.frame() 
+top_20_mixtures_03 = predicted_utilities_df_03$utilities_summary %>%
+  arrange(desc(p50)) %>%
+  select(R, O, Y, G, B, P, UV) %>%
+  distinct() %>%
+  head(20) %>%
+  as.data.frame()
 
 
-top_20_mixtures_03_min = top_20_mixtures_03 %>% 
+top_20_mixtures_03_min = top_20_mixtures_03 %>%
   apply(., 2, min)
 
 
-top_20_mixtures_03_max = top_20_mixtures_03 %>% 
+top_20_mixtures_03_max = top_20_mixtures_03 %>%
   apply(., 2, max)
 
 
@@ -544,24 +600,24 @@ top_20_mixtures_03_max
 
 
 # top 5 overall
-top_5_03_overall = predicted_utilities_df_03$utilities_summary %>% 
+top_5_03_overall = predicted_utilities_df_03$utilities_summary %>%
   top_n(5, p50)
 
 
 # top 5 with lower SD
-top_5_03_low_sd = predicted_utilities_df_03$utilities_summary %>% 
-  top_n(100, p50) %>% 
-  arrange(sd) %>% 
+top_5_03_low_sd = predicted_utilities_df_03$utilities_summary %>%
+  top_n(100, p50) %>%
+  arrange(sd) %>%
   head(5)
 
 
 
-top_5_03_overall %>% 
+top_5_03_overall %>%
   bind_rows(
     top_5_03_low_sd
-  ) %>% 
-  as.data.frame() %>% 
-  mutate(id = 1:nrow(.)) %>% 
+  ) %>%
+  as.data.frame() %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point() +
   geom_point() +
@@ -574,15 +630,15 @@ top_5_03_overall %>%
 
 
 
-top_5_03_min = top_5_03_low_sd %>% 
-  bind_rows(top_5_03_overall) %>% 
-  select(R, O, Y, G, B, P, UV, intensity) %>% 
+top_5_03_min = top_5_03_low_sd %>%
+  bind_rows(top_5_03_overall) %>%
+  select(R, O, Y, G, B, P, UV, intensity) %>%
   apply(., 2, min)
 
 
-top_5_03_max = top_5_03_low_sd %>% 
-  bind_rows(top_5_03_overall) %>% 
-  select(R, O, Y, G, B, P, UV, intensity) %>% 
+top_5_03_max = top_5_03_low_sd %>%
+  bind_rows(top_5_03_overall) %>%
+  select(R, O, Y, G, B, P, UV, intensity) %>%
   apply(., 2, max)
 
 
@@ -601,17 +657,17 @@ top_5_03_max
 
 # Even more granular around the best values predicted in previous step
 lattice_design_7_ing_03 = create_lattice_design(
-  n_var = 7, n_levels = 10, 
+  n_var = 7, n_levels = 10,
   limits = as.matrix(bind_rows(top_5_03_min, top_5_03_max) %>% select(-intensity))
-) %>% 
+) %>%
   set_names(c('R','O','Y','G','B','P', 'UV'))
 
 
 
-df_to_predict_04 = lattice_design_7_ing_03 %>% 
+df_to_predict_04 = lattice_design_7_ing_03 %>%
   expand_grid(
     .,
-    intensity = seq(top_5_03_min["intensity"], top_5_03_max["intensity"], by = 0.01), 
+    intensity = seq(top_5_03_min["intensity"], top_5_03_max["intensity"], by = 0.01),
     no_choice = 0
   )
 
@@ -620,16 +676,17 @@ df_to_predict_04 = lattice_design_7_ing_03 %>%
 
 # 32 seconds with 600 samples, 10 draws per sample, and 28K rows in df_to_predict
 # 25 seconds with 1200 samples, 10 draws per sample, and 11K rows in df_to_predict
+# 30 seconds with 1800 samples, 10 draws per sample, and 9K rows in df_to_predict
 Sys.time()
 predicted_utilities_df_04 = predict_utilities_design(
-  df_to_predict = df_to_predict_04, 
+  df_to_predict = df_to_predict_04,
   beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
   include_all_utilities = F
 )
 Sys.time()
 
 
-predicted_utilities_df_04$utilities_summary %>% 
+predicted_utilities_df_04$utilities_summary %>%
   arrange(desc(p50))
 
 
@@ -645,18 +702,18 @@ x_vector = c(0.07, 0.2, 0, 0, 0, 0.23, 0.5, 0.65)
 get_utility_distribution = function(
   x_vector, beta_level_1_draws_hmnl, include_all_utilities = T
 ){
-  
-  df_to_predict = as.data.frame(t(x_vector)) %>% 
-    set_names(c("R", "O", "Y", "G", "B", "P", "UV", "intensity")) %>% 
+
+  df_to_predict = as.data.frame(t(x_vector)) %>%
+    set_names(c("R", "O", "Y", "G", "B", "P", "UV", "intensity")) %>%
     mutate(no_choice = 0)
-  
+
   pred_list = predict_utilities_design(
-    df_to_predict, 
+    df_to_predict,
     beta_level_1_draws_hmnl = beta_level_1_draws_hmnl,
     include_all_utilities = include_all_utilities)
-  
+
   return(pred_list)
-  
+
 }
 
 
@@ -690,11 +747,11 @@ get_utility_distribution(
 utility_optim_function = function(x_vector_optim){
   # First element is 1 minus the sum of the rest
   n_param = length(x_vector_optim)
-  
+
   x_vector2 = rep(0.0, n_param+1)
   x_vector2[1] = 1 - sum(x_vector_optim[1:(n_param-1)])
   x_vector2[2:(n_param+1)] = x_vector_optim
-  
+
   return(
     get_utility_distribution(
       x_vector = x_vector2,
@@ -744,9 +801,9 @@ get_utility_distribution(
 
 
 
-optim_initial_par_02 = predicted_utilities_df_04$utilities_summary %>% 
-  top_n(1, p50) %>% 
-  select(O, Y, G, B, P, UV, intensity) %>% 
+optim_initial_par_02 = predicted_utilities_df_04$utilities_summary %>%
+  top_n(1, p50) %>%
+  select(O, Y, G, B, P, UV, intensity) %>%
   as.numeric()
 
 
@@ -810,50 +867,50 @@ get_utility_distribution(
 
 
 
-best_utilities_so_far = predicted_utilities_df_01$utilities_summary %>% 
-  top_n(5, p50) %>% 
+best_utilities_so_far = predicted_utilities_df_01$utilities_summary %>%
+  top_n(5, p50) %>%
   bind_rows(
-    predicted_utilities_df_02$utilities_summary %>% 
+    predicted_utilities_df_02$utilities_summary %>%
       top_n(5, p50)
-    
-  ) %>% 
+
+  ) %>%
   bind_rows(
-    predicted_utilities_df_03$utilities_summary %>% 
+    predicted_utilities_df_03$utilities_summary %>%
       top_n(5, p50)
-    
-  ) %>% 
+
+  ) %>%
   bind_rows(
-    predicted_utilities_df_04$utilities_summary %>% 
+    predicted_utilities_df_04$utilities_summary %>%
       top_n(5, p50)
-    
-  ) %>% 
+
+  ) %>%
   bind_rows(
     get_utility_distribution(
       x_vector = transform_optim_to_mixture_pv(optim_mixt_result_01$par),
       beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
       include_all_utilities = F
     )$utilities_summary
-  ) %>% 
+  ) %>%
   bind_rows(
     get_utility_distribution(
       x_vector = transform_optim_to_mixture_pv(optim_mixt_result_02$par),
       beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
       include_all_utilities = F
     )$utilities_summary
-  ) %>% 
+  ) %>%
   bind_rows(
     get_utility_distribution(
       x_vector = transform_optim_to_mixture_pv(optim_mixt_result_03$par),
       beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
       include_all_utilities = F
     )$utilities_summary
-  ) %>% 
+  ) %>%
   arrange(desc(p50))
 
 best_utilities_so_far
 
-best_utilities_so_far %>% 
-  mutate(id = 1:nrow(.)) %>% 
+best_utilities_so_far %>%
+  mutate(id = 1:nrow(.)) %>%
   ggplot(aes(id, y = p50)) +
   geom_point() +
   geom_linerange(aes(ymin = p10, ymax = p90)) +
@@ -861,18 +918,18 @@ best_utilities_so_far %>%
 
 
 
-best_utilities_so_far %>% 
-  select(R:intensity, p50) %>% 
-  mutate(ix = 1:nrow(.)) %>% 
-  pivot_longer(R:intensity) %>% 
+best_utilities_so_far %>%
+  select(R:intensity, p50) %>%
+  mutate(ix = 1:nrow(.)) %>%
+  pivot_longer(R:intensity) %>%
   ggplot() +
   geom_point(aes(name, value, color = ix))
 
-best_utilities_so_far %>% 
-  select(R:intensity, p50) %>% 
-  arrange(p50) %>% 
-  mutate(ix = as.character(1:nrow(.))) %>% 
-  pivot_longer(R:intensity) %>% 
+best_utilities_so_far %>%
+  select(R:intensity, p50) %>%
+  arrange(p50) %>%
+  mutate(ix = as.character(1:nrow(.))) %>%
+  pivot_longer(R:intensity) %>%
   ggplot(aes(name, value, color = ix)) +
   geom_jitter() +
   theme_bw()
@@ -880,24 +937,24 @@ best_utilities_so_far %>%
 
 
 
-best_utilities_so_far %>% 
-  select(R:intensity, p50) %>% 
-  arrange(desc(p50)) %>% 
-  head(15) %>% 
-  mutate(ix = as.character(1:nrow(.))) %>% 
-  pivot_longer(R:intensity) %>% 
+best_utilities_so_far %>%
+  select(R:intensity, p50) %>%
+  arrange(desc(p50)) %>%
+  head(15) %>%
+  mutate(ix = as.character(1:nrow(.))) %>%
+  pivot_longer(R:intensity) %>%
   ggplot(aes(name, value, color = ix, label = ix)) +
   geom_point() +
   geom_label(hjust = 5, nudge_x = 0.1, nudge_y = 0.1) +
   theme_bw()
 
 
-best_utilities_so_far %>% 
-  select(R:intensity, p50) %>% 
-  arrange(desc(p50)) %>% 
-  head(15) %>% 
-  mutate(ix = as.character(1:nrow(.))) %>% 
-  pivot_longer(R:intensity) %>% 
+best_utilities_so_far %>%
+  select(R:intensity, p50) %>%
+  arrange(desc(p50)) %>%
+  head(15) %>%
+  mutate(ix = as.character(1:nrow(.))) %>%
+  pivot_longer(R:intensity) %>%
   ggplot(aes(name, value, color = ix)) +
   geom_jitter() +
   theme_bw()
@@ -905,8 +962,9 @@ best_utilities_so_far %>%
 
 
 
-predicted_utilities_df_01$utilities_summary %>% 
-  top_n(-5, p50)
+predicted_utilities_df_01$utilities_summary %>%
+  top_n(-5, p50) %>% 
+  arrange(p50)
 
 worst_color = tibble(
   R = c(1),
@@ -915,50 +973,94 @@ worst_color = tibble(
   G = c(0),
   B = c(0),
   P = c(0),
-) %>% 
+) %>%
   mutate(
     UV = 1 - R - O - Y - G - B - P,
     intensity = c(-1)
   )
 
 
-# Best colors and worst color
-hand_picked_colors = tibble(
+# Best colors and worst color from last experiment
+hand_picked_colors_from_previous_iteration = tibble(
   R = c(0.0476, 0.0556, 0.0556),
   O = c(0,0,0),
   Y = c(0,0,0),
   G = c(1/3, 1/3, 1/3),
   B = c(0,0,0),
   P = c(0,0,0),
-) %>% 
+) %>%
   mutate(
     UV = 1 - R - O - Y - G - B - P,
-    intensity = c(0.66, 0.8, 0.6)) %>% 
-  bind_rows(worst_color) 
+    intensity = c(0.66, 0.8, 0.6)) %>%
+  bind_rows(worst_color)
+
+
+
+predict_utilities_design(
+  df_to_predict = hand_picked_colors_from_previous_iteration %>% mutate(no_choice = 0),
+  beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
+  include_all_utilities = F
+)
+
+
+
+
+# Best colors and worst color
+hand_picked_colors_this_iteration = tibble(
+  R = c(0.225, 0.238),
+  O = c(0.00319, 0),
+  Y = c(0, 0),
+  G = c(0, 0),
+  B = c(0, 0),
+  P = c(0.238, 0.238),
+) %>%
+  mutate(
+    UV = 1 - R - O - Y - G - B - P,
+    intensity = c(0.57, 0.55)) %>%
+  bind_rows(worst_color)
+
+predict_utilities_design(
+  df_to_predict = hand_picked_colors_this_iteration %>% mutate(no_choice = 0),
+  beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
+  include_all_utilities = F
+)
+
+
+hand_picked_colors = hand_picked_colors_from_previous_iteration %>% 
+  bind_rows(hand_picked_colors_this_iteration) %>% 
+  distinct()
+
+predict_utilities_design(
+  df_to_predict = hand_picked_colors %>% mutate(no_choice = 0),
+  beta_level_1_draws_hmnl = beta_level_1_draws_hmnl_10samples,
+  include_all_utilities = F
+)
+
+
 
 
 combinations = combn(nrow(hand_picked_colors), 2)
 
 hand_picked_choice_sets = lapply(1:ncol(combinations), function(i){
-  df_1 = hand_picked_colors %>% 
-    slice(combinations[, i]) %>% 
+  df_1 = hand_picked_colors %>%
+    slice(combinations[, i]) %>%
     mutate(alt = 1:n(), choice_set = 2*i - 1)
-  
+
   #reverse the order
-  df_2 = hand_picked_colors %>% 
-    slice(rev(combinations[, i])) %>% 
+  df_2 = hand_picked_colors %>%
+    slice(rev(combinations[, i])) %>%
     mutate(alt = 1:n(), choice_set = 2*i)
-  
-  out = df_1 %>% 
+
+  out = df_1 %>%
     bind_rows(df_2)
-  
+
   return(out)
-}) %>% 
+}) %>%
   bind_rows()
 
 
-saveRDS(hand_picked_choice_sets, here("japanese_fly/out/handpicked_choice_sets_4th_i_opt_design.rds"))
-
+saveRDS(hand_picked_choice_sets, here("japanese_fly/out/handpicked_choice_sets_5th_i_opt_design.rds"))
+saveRDS(hand_picked_colors, here("japanese_fly/out/handpicked_colors_5th_i_opt_design.rds"))
 
 
 
@@ -970,35 +1072,35 @@ saveRDS(hand_picked_choice_sets, here("japanese_fly/out/handpicked_choice_sets_4
 # get_utility_plugin_distribution = function(
 #   x_vector, beta_level_0_draws_hmnl, Sigma_level_0_draws_hmnl, include_all_utilities = T
 # ){
-#   
-#   df_to_predict = as.data.frame(t(x_vector)) %>% 
-#     set_names(c("R", "O", "Y", "G", "B", "P", "UV", "intensity")) %>% 
+#
+#   df_to_predict = as.data.frame(t(x_vector)) %>%
+#     set_names(c("R", "O", "Y", "G", "B", "P", "UV", "intensity")) %>%
 #     mutate(no_choice = 0)
-#   
+#
 #   X_to_predict_list <- create_model_matrix_second_order_scheffe(df_to_predict)
-#   
+#
 #   n_draws = nrow(beta_level_0_draws_hmnl[[1]])
-#   
+#
 #   utilities_post = matrix(0.0, ncol = n_draws, nrow = nrow(X_to_predict_list$X))
-#   
+#
 #   for(d in 1:n_draws){
 #     beta_level_0_d = beta_level_0_draws_hmnl[[1]][d, ]
 #     utilities_d = X_to_predict_list$X %*% beta_level_0_d
-#     
+#
 #     utilities_post[, d] = utilities_d
 #   }
-#   
-#   
+#
+#
 #   quantiles_utilities = t(apply(utilities_post, 1, function(x) c(quantile(x, probs = c(0.1, 0.5, 0.9)), sd = sd(x)) ))
-#   
-#   
-#   out_utilities_summary = df_to_predict %>% 
-#     mutate(order_original = 1:n()) %>% 
-#     bind_cols(quantiles_utilities %>% 
-#                 as_tibble() %>% 
+#
+#
+#   out_utilities_summary = df_to_predict %>%
+#     mutate(order_original = 1:n()) %>%
+#     bind_cols(quantiles_utilities %>%
+#                 as_tibble() %>%
 #                 set_names(c("p10", "p50", "p90", "sd")))
-#   
-#   
+#
+#
 #   if(include_all_utilities){
 #     out = list(
 #       utilities_summary = out_utilities_summary,
@@ -1009,40 +1111,40 @@ saveRDS(hand_picked_choice_sets, here("japanese_fly/out/handpicked_choice_sets_4
 #       utilities_summary = out_utilities_summary
 #     )
 #   }
-#   
+#
 #   return(out)
-#   
+#
 # }
-# 
-# 
-# 
-# 
-# 
+#
+#
+#
+#
+#
 # get_utility_plugin_distribution(
 #   x_vector = c(0.1, 0.114, 0, 0, 0, 0.3, 0.486, 0.65),
-#   beta_level_0_draws_hmnl = beta_level_0_draws_hmnl, 
+#   beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
 #   Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
 #   include_all_utilities = F
 # )
-# 
-# 
-# 
+#
+#
+#
 # plugin_utility_optim_function = function(x_vector_optim){
 #   # First element is 1 minus the sum of the rest
 #   n_param = length(x_vector_optim)
-#   
+#
 #   x_vector2 = rep(0.0, n_param+1)
 #   x_vector2[1] = 1 - sum(x_vector_optim[1:(n_param-1)])
 #   x_vector2[2:(n_param+1)] = x_vector_optim
-#   
+#
 #   return(
 #     get_utility_plugin_distribution(
 #       x_vector = x_vector2,
-#       beta_level_0_draws_hmnl = beta_level_0_draws_hmnl, 
+#       beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
 #       Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
 #       include_all_utilities = F
 #     )$utilities_summary$p50
 #   )
 # }
-# 
+#
 # plugin_utility_optim_function(c(0.1, 0.114, 0, 0, 0, 0.3, 0.486, 0.65))

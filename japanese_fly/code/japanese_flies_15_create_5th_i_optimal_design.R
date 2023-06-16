@@ -20,7 +20,7 @@ length_beta_flies_01 = nrow(beta_values_flies_01)
 
 q_flies_01 = 7
 J_flies_01 = 2
-S_flies_01 = 60
+S_flies_01 = 80
 order_flies_01 = 2
 n_pv_flies_01 = 1
 no_choice_flies_01 = T
@@ -94,6 +94,29 @@ data.frame(
 
 
 
+# read hand picked choice sets
+hand_picked_choice_sets_tibble = readRDS(here("japanese_fly/out/handpicked_choice_sets_5th_i_opt_design.rds"))
+
+# filtered by hand the choice sets with very very similar alternatives
+# This is because the coordinate exchange was having trouble computing the I-optimality
+hand_picked_choice_sets_tibble_filtered = hand_picked_choice_sets_tibble %>% 
+  filter(!(choice_set %in% c(29, 30, 3, 4, 1, 2, 11, 12))) %>% 
+  select(-alt)
+
+
+hand_picked_choice_sets_array = mnl_design_dataframe_to_array(
+  hand_picked_choice_sets_tibble_filtered
+  )
+
+hand_picked_colors = readRDS(here("japanese_fly/out/handpicked_colors_5th_i_opt_design.rds"))
+hand_picked_colors_matrix = as.matrix(hand_picked_colors)
+
+
+
+
+
+
+
 i_opt_design_filename_flies_01 = paste0(here("japanese_fly/out/japanese_flies_5th_i_optimal_design.rds"))
 
 # Around 20 minutes per iteration
@@ -123,8 +146,11 @@ if(file.exists(i_opt_design_filename_flies_01)){
     seed = 2023,
     n_cores = 6,
     save_all_designs = T,
-    no_choice = T
+    no_choice = T,
+    fixed_choice_sets = hand_picked_choice_sets_array,
+    fixed_alternatives = hand_picked_colors_matrix
   )
+  
   (t2I = Sys.time())
   t2I - t1I
   
