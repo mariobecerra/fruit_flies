@@ -196,6 +196,15 @@ stan_data <- list(
 # 10 hours for 600 iterations (300 warmup)
 # No warnings about treedepth or divergent transitions
 
+
+# With 8 experiments and 30 images per choice set:
+# Gradient evaluation took 0.074529 seconds
+# 1000 transitions using 10 leapfrog steps per transition would take 745.29 seconds.
+# 12 hours for 600 iterations (300 warmup)
+# There were 1799 transitions after warmup that exceeded the maximum treedepth
+# No warnings about divergent transitions
+
+
 model_01_filename = here(paste0("japanese_fly/out/japanese_hmnl_model_experiments_1_to_", n_experiments, "_stan_object_", n_images_per_cs_to_sample, "images.rds"))
 
 if(file.exists(model_01_filename)){
