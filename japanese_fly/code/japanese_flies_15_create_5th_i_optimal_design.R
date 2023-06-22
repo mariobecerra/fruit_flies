@@ -119,10 +119,7 @@ hand_picked_colors_matrix = as.matrix(hand_picked_colors)
 
 i_opt_design_filename_flies_01 = paste0(here("japanese_fly/out/japanese_flies_5th_i_optimal_design.rds"))
 
-# Around 20 minutes per iteration
-# Hence, 15 iterations would take around 5 hours
-# And, 20 iterations would take around 6.7 hours
-# 6 initial designs with 25 iterations on 4 cores (should have been 6) on the HP machine took 9.3 hours
+# 4 initial designs with 25 iterations on 4 cores on my Mac took 12 hours
 if(file.exists(i_opt_design_filename_flies_01)){
   cat("I_B optimal design already exists.\n")
   i_opt_design_flies_01 = readRDS(i_opt_design_filename_flies_01)
@@ -130,7 +127,7 @@ if(file.exists(i_opt_design_filename_flies_01)){
   cat("Doing I_B optimal design for insect experiment.\n")
   (t1I = Sys.time())
   i_opt_design_flies_01 =  mnl_mixture_coord_exch(
-    n_random_starts = 6,
+    n_random_starts = 4,
     q = q_flies_01, 
     J = J_flies_01, 
     S = S_flies_01, 
@@ -144,7 +141,7 @@ if(file.exists(i_opt_design_filename_flies_01)){
     verbose = 1,
     plot_designs = F,
     seed = 2023,
-    n_cores = 6,
+    n_cores = 4,
     save_all_designs = T,
     no_choice = T,
     fixed_choice_sets = hand_picked_choice_sets_array,
