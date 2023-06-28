@@ -4,10 +4,12 @@ library(here)
 
 
 # Update with latest counts!!!
-count_data = read_csv(here('japanese_fly/out/counts_japanese_2023-06-15.csv'))
+count_data = read_csv(here('japanese_fly/out/counts_japanese_2023-06-22.csv'))
 
 
-design_mapping = read_csv(here("japanese_fly/out/design_mapping_japanese.csv"))
+design_mapping = read_csv(here("japanese_fly/out/design_mapping_japanese.csv")) %>% 
+  # there are some repeated elements because some choice sets are repeated in the last experiments
+  distinct()
 
 # Assume 80 flies per experiment
 n_experiments = max(count_data$experiment)

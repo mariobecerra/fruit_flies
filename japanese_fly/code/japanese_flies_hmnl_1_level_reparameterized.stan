@@ -47,6 +47,7 @@ model {
   
 
   for(i in 1:n_images){
+    // print("loop iteration: ", i);
     utilities = X[start[i]:end[i], 1:n_var]*beta_level_1[exp_index[i]]';
     target += sum(log_softmax(utilities) .* Ny[start[i]:end[i]]);
   }
