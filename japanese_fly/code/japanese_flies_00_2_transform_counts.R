@@ -4,7 +4,7 @@ library(here)
 
 
 # Update with latest counts!!!
-count_data = read_csv(here('japanese_fly/out/counts_japanese_2023-06-22.csv'))
+count_data = read_csv(here('japanese_fly/out/counts_japanese_2023-08-15.csv'))
 
 
 design_mapping = read_csv(here("japanese_fly/out/design_mapping_japanese.csv")) %>% 
