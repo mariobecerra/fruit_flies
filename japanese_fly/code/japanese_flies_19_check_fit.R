@@ -227,10 +227,13 @@ ggsave(
   here("japanese_fly/out/plots/fly_counts_ppc_dens_overlay.png"), 
   plot = ppc_dens_overlay_plots, 
   width = 70, height = 20, units = "cm", dpi = 300
-  )
+)
 
 rm(pp_check_list)
 rm(ppc_dens_overlay_plots)
+
+
+
 
 
 
@@ -337,6 +340,54 @@ ggsave(
 rm(pp_check_list_3)
 
 
+
+
+
+
+
+
+
+
+pp_check_list_4 = lapply(1:(3*length(back_predictions)), function(x) x)
+counter = 1
+for(i in 1:length(back_predictions)){
+  
+  for(j in 1:3){
+    
+    if(j == 1) side = "Left"
+    if(j == 2) side = "Right"
+    if(j == 3) side = "No choice"
+    
+    # out = pp_check(
+    #   back_predictions[[i]]$design_df_preds$Ny[seq(j, length(back_predictions[[i]]$design_df_preds$Ny), by = 3)],
+    #   back_predictions[[i]]$N_flies_post[, j, ], 
+    #   ppc_bars(size = 0.5)
+    # ) +
+    out = ppc_bars(
+      back_predictions[[i]]$design_df_preds$Ny[seq(j, length(back_predictions[[i]]$design_df_preds$Ny), by = 3)],
+      back_predictions[[i]]$N_flies_post[, j, ], 
+      size = 1, fatten = 1
+    ) +
+      ggtitle(paste0("Experiment ", i, ". ", side, ".")) +
+      theme_bw() +
+      theme(plot.title = element_text(size = 15),
+            legend.position = "none")
+    
+    pp_check_list_4[[counter]] = out
+    counter = counter + 1
+  }
+}
+
+ppc_bars_plots_2 = gridExtra::arrangeGrob(grobs = pp_check_list_4, nrow = length(back_predictions))
+
+
+ggsave(
+  here("japanese_fly/out/plots/fly_counts_ppc_bars_2.png"), 
+  plot = ppc_bars_plots_2, 
+  width = 30, height = 43, units = "cm", dpi = 150, limitsize = F
+)
+
+rm(pp_check_list_4)
 
 
 
