@@ -1237,6 +1237,122 @@ ggsave(
 
 
 
+# Predictions on which alternative is more attractive according to the median number of flies
+# and the predicted number of flies
+
+predicted_N_flies_utilities_tibble_02_aux2 %>% 
+  select(folder, choice_set, alternative, group2, median_n_flies) %>% 
+  distinct() %>% 
+  left_join(
+    predicted_N_flies_utilities_tibble_02
+  ) %>% 
+  group_by(folder, choice_set, group2) %>% 
+  mutate(
+    n_left_real = first(median_n_flies),
+    n_right_real = last(median_n_flies),
+    n_left_pred_p45 = first(p45_N_flies),
+    n_right_pred_p45 = last(p45_N_flies),
+    n_left_pred_p55 = first(p55_N_flies),
+    n_right_pred_p55 = last(p55_N_flies)
+  ) %>% 
+  select(starts_with("n_")) %>% 
+  distinct() %>% 
+  ungroup() %>% 
+  mutate(pred_correct = ifelse(
+    (n_left_real > n_right_real & n_left_pred_p45 > n_right_pred_p45) |
+      (n_left_real > n_right_real & n_left_pred_p55 > n_right_pred_p55) | 
+      (n_left_real < n_right_real & n_left_pred_p45 < n_right_pred_p45) |
+      (n_left_real < n_right_real & n_left_pred_p55 < n_right_pred_p55) | 
+      (n_left_real == n_right_real & n_left_pred_p55 == n_right_pred_p55) |
+      (n_left_real == n_right_real & n_left_pred_p45 == n_right_pred_p45), 
+    1, 0)) %>% 
+  pull(pred_correct) %>% 
+  sum()
+
+# 26 cs out of 30
+
+
+
+
+predicted_N_flies_df_cs_not_of_interest_aux2_part1 %>% 
+  select(folder, choice_set, alternative, median_n_flies) %>% 
+  distinct() %>% 
+  left_join(
+    predicted_N_flies_df_cs_not_of_interest_part1
+  ) %>% 
+  group_by(folder, choice_set) %>% 
+  mutate(
+    n_left_real = first(median_n_flies),
+    n_right_real = last(median_n_flies),
+    n_left_pred_p45 = first(p45_N_flies),
+    n_right_pred_p45 = last(p45_N_flies),
+    n_left_pred_p55 = first(p55_N_flies),
+    n_right_pred_p55 = last(p55_N_flies)
+  ) %>% 
+  select(starts_with("n_")) %>% 
+  distinct() %>% 
+  ungroup() %>% 
+  mutate(pred_correct = ifelse(
+    (n_left_real > n_right_real & n_left_pred_p45 > n_right_pred_p45) |
+      (n_left_real > n_right_real & n_left_pred_p55 > n_right_pred_p55) | 
+      (n_left_real < n_right_real & n_left_pred_p45 < n_right_pred_p45) |
+      (n_left_real < n_right_real & n_left_pred_p55 < n_right_pred_p55) | 
+      (n_left_real == n_right_real & n_left_pred_p55 == n_right_pred_p55) |
+      (n_left_real == n_right_real & n_left_pred_p45 == n_right_pred_p45), 
+    1, 0)) %>% 
+  pull(pred_correct) %>% 
+  sum()
+
+# 27 cs out of 30
+
+
+
+
+
+
+
+predicted_N_flies_df_cs_not_of_interest_aux2_part2 %>% 
+  select(folder, choice_set, alternative, median_n_flies) %>% 
+  distinct() %>% 
+  left_join(
+    predicted_N_flies_df_cs_not_of_interest_part2
+  ) %>% 
+  group_by(folder, choice_set) %>% 
+  mutate(
+    n_left_real = first(median_n_flies),
+    n_right_real = last(median_n_flies),
+    n_left_pred_p45 = first(p45_N_flies),
+    n_right_pred_p45 = last(p45_N_flies),
+    n_left_pred_p55 = first(p55_N_flies),
+    n_right_pred_p55 = last(p55_N_flies)
+  ) %>% 
+  select(starts_with("n_")) %>% 
+  distinct() %>% 
+  ungroup() %>% 
+  mutate(pred_correct = ifelse(
+    (n_left_real > n_right_real & n_left_pred_p45 > n_right_pred_p45) |
+      (n_left_real > n_right_real & n_left_pred_p55 > n_right_pred_p55) | 
+      (n_left_real < n_right_real & n_left_pred_p45 < n_right_pred_p45) |
+      (n_left_real < n_right_real & n_left_pred_p55 < n_right_pred_p55) | 
+      (n_left_real == n_right_real & n_left_pred_p55 == n_right_pred_p55) |
+      (n_left_real == n_right_real & n_left_pred_p45 == n_right_pred_p45), 
+    1, 0)) %>% 
+  pull(pred_correct) %>% 
+  sum()
+
+# 20 cs out of 28
+
+
+
+# 26 + 27 + 20 = 73 out of 88 choice sets
+# 73/88 = 0.818181
+# In 82% of choice sets our predictions matched which would be more attractive
+
+# The numbers are almost identical using 48 and 52 percentiles instead of 45 and 55:
+# 25 + 27 + 21 = 73 out of 88 choice sets
+
+
+
 
 
 
