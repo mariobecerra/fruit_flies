@@ -2,7 +2,7 @@ library(opdesmixr)
 library(tidyverse)
 library(here)
 
-designs_folder = here("/Users/apple/Desktop/out/insect_pv_designs/")
+designs_folder = here("european_fly/out/")
 dir.create(designs_folder, showWarnings = F)
 
 n_cores = parallel::detectCores()
