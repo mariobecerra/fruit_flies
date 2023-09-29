@@ -28,7 +28,7 @@ names(beta_vec) = c(
 )
 
 # we want to keep=1 we want to drop=0.01 
-SDs = c(rep(1,6),rep(0.01,21),rep(1,7),0.01)
+SDs = c(rep(10,6), rep(0.01,21), rep(10,7), 0.01)
 names(SDs) = names(beta_vec)
 var_cov_mat = diag(SDs^2)
 
