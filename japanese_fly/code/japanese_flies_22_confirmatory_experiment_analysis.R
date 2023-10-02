@@ -733,7 +733,7 @@ predicted_N_flies_utilities_tibble_02_aux = predicted_N_flies_utilities_tibble_0
   mutate(group = sprintf("%02d", group_order)) %>% 
   mutate(side = ifelse(substr(alternative, 1, 1) == "1", "L", "R")) %>% 
   mutate(x2 = paste0(side, ": ", color_ix, ifelse(side == "R", "", "   "))) %>% 
-  mutate(group2 = paste0("Manual c.s. ", group_order)) %>% 
+  mutate(group2 = paste0("Holdout c.s. ", group_order)) %>% 
   mutate(group2 = fct_reorder(group2, group_order))
 
 
@@ -1355,6 +1355,107 @@ predicted_N_flies_df_cs_not_of_interest_aux2_part2 %>%
 
 
 
+##### 100% UV
+
+
+folders_with_100uv = counts_japanese %>% 
+  filter(UV == 1, no_choice == 0) %>% 
+  pull(folder) %>% 
+  unique()
+
+
+counts_japanese %>% 
+  filter(folder %in% folders_with_100uv)
+
+
+counts_japanese %>% 
+  filter(folder %in% folders_with_100uv) %>% 
+  filter(UV == 1) %>% 
+  group_by(experiment, folder, alternative) %>% 
+  summarize(median_n_flies = median(count),
+            max_n_flies = max(count))
+
+
+
+uv_100_tibble_to_predict = tibble(
+  R = 0, O = 0, Y = 0, G = 0, B = 0, P = 0, UV = 1, intensity = seq(-1, 1, by = 0.05)
+) %>% 
+  mutate(no_choice = 0)
+
+
+uv_100_predicted_utilities_samples = predict_utilities_design(
+  df_to_predict = uv_100_tibble_to_predict,
+  beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
+  Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
+  include_all_utilities = T,
+  n_draws_per_posterior_sample = 10,
+  seed = 2023
+)
+
+
+
+uv_100_predicted_utilities_samples$utilities_summary %>% 
+  ggplot(aes(x = intensity, y = p50, ymin = p10, ymax = p90)) +
+  geom_line() +
+  geom_ribbon(alpha = 0.3) +
+  theme_bw() +
+  ylab("Predicted utility")
+
+
+
+best_color_diff_intensities_tibble = exp_10_handpicked_colors_indices_and_utilities[1,] %>% 
+  select(R:UV) %>% 
+  bind_cols(intensity = seq(-1, 1, by = 0.05)) %>% 
+  mutate(no_choice = 0)
+
+
+
+best_color_diff_intensities_predicted_utilities_samples = predict_utilities_design(
+  df_to_predict = best_color_diff_intensities_tibble,
+  beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
+  Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
+  include_all_utilities = F,
+  n_draws_per_posterior_sample = 10,
+  seed = 2023
+)
+
+
+
+best_color_diff_intensities_predicted_utilities_samples$utilities_summary %>% 
+  ggplot(aes(x = intensity, y = p50, ymin = p10, ymax = p90)) +
+  geom_line() +
+  geom_ribbon(alpha = 0.3) +
+  theme_bw() +
+  ylab("Predicted utility")
+
+
+
+
+utility_intensity_plots_width = 20
+utility_intensity_plots_height = 10
+
+best_color_100uv_intensity_plot = best_color_diff_intensities_predicted_utilities_samples$utilities_summary %>% 
+  mutate(Color = "Best predicted color") %>% 
+  bind_rows(
+    uv_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% UV")
+  ) %>% 
+  ggplot(aes(x = intensity, y = p50, ymin = p10, ymax = p90, color = Color, fill = Color)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(alpha = 0.2, linetype = 0) +
+  theme_bw() +
+  xlab("Intensity") +
+  ylab("Predicted utility") +
+  scale_fill_manual(values = c("#5f4b8b", "#28bd5f")) +
+  scale_color_manual(values = c("#5f4b8b", "#28bd5f"))
+  
+
+ggsave(
+  plot = best_color_100uv_intensity_plot,
+  filename = here("japanese_fly/out/plots/best_color_100uv_intensity_plot_01.png"),
+  width = utility_intensity_plots_width, height = utility_intensity_plots_height, 
+  units = "cm", dpi = 300
+)
 
 
 
@@ -1365,6 +1466,82 @@ predicted_N_flies_df_cs_not_of_interest_aux2_part2 %>%
 
 
 
+r_100_predicted_utilities_samples = predict_utilities_design(
+  df_to_predict = tibble(
+    R = 1, O = 0, Y = 0, G = 0, B = 0, P = 0, UV = 0, intensity = seq(-1, 1, by = 0.05)
+  ) %>% 
+    mutate(no_choice = 0),
+  beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
+  Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
+  include_all_utilities = F,
+  n_draws_per_posterior_sample = 10,
+  seed = 2023
+)
+
+
+o_100_predicted_utilities_samples = predict_utilities_design(
+  df_to_predict = tibble(
+    R = 0, O = 1, Y = 0, G = 0, B = 0, P = 0, UV = 0, intensity = seq(-1, 1, by = 0.05)
+  ) %>% 
+    mutate(no_choice = 0),
+  beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
+  Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
+  include_all_utilities = F,
+  n_draws_per_posterior_sample = 10,
+  seed = 2023
+)
+
+
+y_100_predicted_utilities_samples = predict_utilities_design(
+  df_to_predict = tibble(
+    R = 0, O = 0, Y = 1, G = 0, B = 0, P = 0, UV = 0, intensity = seq(-1, 1, by = 0.05)
+  ) %>% 
+    mutate(no_choice = 0),
+  beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
+  Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
+  include_all_utilities = F,
+  n_draws_per_posterior_sample = 10,
+  seed = 2023
+)
+
+
+g_100_predicted_utilities_samples = predict_utilities_design(
+  df_to_predict = tibble(
+    R = 0, O = 0, Y = 0, G = 1, B = 0, P = 0, UV = 0, intensity = seq(-1, 1, by = 0.05)
+  ) %>% 
+    mutate(no_choice = 0),
+  beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
+  Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
+  include_all_utilities = F,
+  n_draws_per_posterior_sample = 10,
+  seed = 2023
+)
+
+
+b_100_predicted_utilities_samples = predict_utilities_design(
+  df_to_predict = tibble(
+    R = 0, O = 0, Y = 0, G = 0, B = 1, P = 0, UV = 0, intensity = seq(-1, 1, by = 0.05)
+  ) %>% 
+    mutate(no_choice = 0),
+  beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
+  Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
+  include_all_utilities = F,
+  n_draws_per_posterior_sample = 10,
+  seed = 2023
+)
+
+
+p_100_predicted_utilities_samples = predict_utilities_design(
+  df_to_predict = tibble(
+    R = 0, O = 0, Y = 0, G = 0, B = 0, P = 1, UV = 0, intensity = seq(-1, 1, by = 0.05)
+  ) %>% 
+    mutate(no_choice = 0),
+  beta_level_0_draws_hmnl = beta_level_0_draws_hmnl,
+  Sigma_level_0_draws_hmnl = Sigma_level_0_draws_hmnl,
+  include_all_utilities = F,
+  n_draws_per_posterior_sample = 10,
+  seed = 2023
+)
 
 
 
@@ -1375,6 +1552,167 @@ predicted_N_flies_df_cs_not_of_interest_aux2_part2 %>%
 
 
 
+colors_plot_100percent = c(
+  "blue",
+  "dark green",
+  "orange",
+  "purple",
+  "red",
+  "#5f4b8b",
+  "yellow",
+  "#28bd5f"
+)
+
+
+best_color_100other_colors_intensity_plot_01 = b_100_predicted_utilities_samples$utilities_summary %>% 
+  mutate(Color = "100% blue") %>% 
+  bind_rows(
+    g_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% green")
+  ) %>% 
+  bind_rows(
+    o_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% orange")
+  ) %>% 
+  bind_rows(
+    p_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% purple")
+  ) %>% 
+  bind_rows(
+    r_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% red")
+  ) %>% 
+  bind_rows(
+    uv_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% UV")
+  ) %>% 
+  bind_rows(
+    y_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% yellow")
+  ) %>% 
+  bind_rows(
+    best_color_diff_intensities_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "Best predicted color")
+  ) %>% 
+  # mutate(ix = 1:nrow(.)) %>% 
+  # mutate(fct_reorder(Color, ix)) %>% 
+  ggplot(aes(x = intensity, y = p50, ymin = p10, ymax = p90, color = Color, fill = Color)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(alpha = 0.2, linetype = 0) +
+  theme_bw() +
+  xlab("Intensity") +
+  ylab("Predicted utility") +
+  scale_color_manual(values = colors_plot_100percent) +
+  scale_fill_manual(values = colors_plot_100percent)
+
+ggsave(
+  plot = best_color_100other_colors_intensity_plot_01,
+  filename = here("japanese_fly/out/plots/best_color_100other_colors_intensity_plot_01.png"),
+  width = utility_intensity_plots_width, height = utility_intensity_plots_height, 
+  units = "cm", dpi = 300
+)
+
+
+
+best_color_100other_colors_intensity_plot_02 = b_100_predicted_utilities_samples$utilities_summary %>% 
+  mutate(Color = "100% blue") %>% 
+  bind_rows(
+    g_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% green")
+  ) %>% 
+  bind_rows(
+    o_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% orange")
+  ) %>% 
+  bind_rows(
+    p_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% purple")
+  ) %>% 
+  bind_rows(
+    r_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% red")
+  ) %>% 
+  bind_rows(
+    uv_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% UV")
+  ) %>% 
+  bind_rows(
+    y_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% yellow")
+  ) %>% 
+  bind_rows(
+    best_color_diff_intensities_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "Best predicted color")
+  ) %>% 
+  # mutate(ix = 1:nrow(.)) %>% 
+  # mutate(fct_reorder(Color, ix)) %>% 
+  ggplot(aes(x = intensity, y = p50, ymin = p50 - sd, ymax = p50 + sd, color = Color, fill = Color)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(alpha = 0.2, linetype = 0) +
+  theme_bw() +
+  xlab("Intensity") +
+  ylab("Predicted utility") +
+  scale_color_manual(values = colors_plot_100percent) +
+  scale_fill_manual(values = colors_plot_100percent)
+
+
+ggsave(
+  plot = best_color_100other_colors_intensity_plot_02,
+  filename = here("japanese_fly/out/plots/best_color_100other_colors_intensity_plot_02.png"),
+  width = utility_intensity_plots_width, height = utility_intensity_plots_height, 
+  units = "cm", dpi = 300
+)
+
+
+
+best_color_100other_colors_intensity_plot_03 = b_100_predicted_utilities_samples$utilities_summary %>% 
+  mutate(Color = "100% blue") %>% 
+  bind_rows(
+    g_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% green")
+  ) %>% 
+  bind_rows(
+    o_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% orange")
+  ) %>% 
+  bind_rows(
+    p_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% purple")
+  ) %>% 
+  bind_rows(
+    r_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% red")
+  ) %>% 
+  bind_rows(
+    uv_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% UV")
+  ) %>% 
+  bind_rows(
+    y_100_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "100% yellow")
+  ) %>% 
+  bind_rows(
+    best_color_diff_intensities_predicted_utilities_samples$utilities_summary %>% 
+      mutate(Color = "Best predicted color")
+  ) %>% 
+  # mutate(ix = 1:nrow(.)) %>% 
+  # mutate(fct_reorder(Color, ix)) %>% 
+  ggplot(aes(x = intensity, y = p50, ymin = p50 - sd, ymax = p50 + sd, color = Color, fill = Color)) +
+  geom_line(size = 1.2) +
+  # geom_ribbon(alpha = 0.2, linetype = 0) +
+  theme_bw() +
+  xlab("Intensity") +
+  ylab("Predicted utility") +
+  scale_color_manual(values = colors_plot_100percent) +
+  scale_fill_manual(values = colors_plot_100percent)
+
+
+ggsave(
+  plot = best_color_100other_colors_intensity_plot_03,
+  filename = here("japanese_fly/out/plots/best_color_100other_colors_intensity_plot_03.png"),
+  width = utility_intensity_plots_width, height = utility_intensity_plots_height, 
+  units = "cm", dpi = 300
+)
 
 
 
