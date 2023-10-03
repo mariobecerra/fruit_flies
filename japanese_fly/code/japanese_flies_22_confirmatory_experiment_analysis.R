@@ -733,7 +733,7 @@ predicted_N_flies_utilities_tibble_02_aux = predicted_N_flies_utilities_tibble_0
   mutate(group = sprintf("%02d", group_order)) %>% 
   mutate(side = ifelse(substr(alternative, 1, 1) == "1", "L", "R")) %>% 
   mutate(x2 = paste0(side, ": ", color_ix, ifelse(side == "R", "", "   "))) %>% 
-  mutate(group2 = paste0("Holdout c.s. ", group_order)) %>% 
+  mutate(group2 = paste0("Validation c.s. ", group_order)) %>% 
   mutate(group2 = fct_reorder(group2, group_order))
 
 
