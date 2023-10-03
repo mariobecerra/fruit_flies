@@ -1719,6 +1719,30 @@ ggsave(
 
 
 
+# Distribution of utilities in each experiment
+
+choice_sets_all_exps = counts_japanese %>% 
+  filter(no_choice != 1) %>% 
+  select(experiment, choice_set, folder, alternative, R:no_choice) %>% 
+  distinct()
+
+betas_level_0_summary
+
+utilities_choice_sets_all_exps = (choice_sets_all_exps %>% 
+                                    select(R:no_choice) %>% 
+                                    create_model_matrix_second_order_scheffe())$X %*% betas_level_0_summary$mean
+
+choice_sets_all_exps$exp_utility = utilities_choice_sets_all_exps
+
+choice_sets_all_exps %>% 
+  ggplot() +
+  geom_boxplot(aes(x = experiment, y = exp_utility, group = experiment)) +
+  xlab("Experiment") +
+  ylab("Expected utility") +
+  theme_bw()
+
+
+
 
 
 
