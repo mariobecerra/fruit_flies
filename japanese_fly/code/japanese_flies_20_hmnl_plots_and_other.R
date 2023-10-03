@@ -77,6 +77,27 @@ ggsave(plot = hyper_betas_plot + ggtitle("") + ylab("") + xlab(""),
 knitr::plot_crop(here("japanese_fly/out/plots/parameter_hyperbetas_2.png"))
 
 
+
+
+plot_all_betas_separate = betas_level_1_summary %>% 
+  ggplot(aes(x = variable)) +
+  geom_hline(yintercept = 0, size = 0.3) +
+  geom_point(aes(y = mean)) +
+  geom_linerange(aes(ymin = mean - 2*sd, ymax = mean + 2*sd)) +
+  theme_bw() +
+  xlab("Parameter") +
+  ylab("Value") +
+  facet_wrap(~exp) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ggtitle(paste0("Japanese fly betas of experiments 1 to ", n_experiments))
+
+
+ggsave(plot = plot_all_betas_separate,
+       filename = here("japanese_fly/out/plots/parameter_all_betas_separate.png"),
+       width = 25, height = 15, units = "cm", dpi = 300)
+
+
+
 plot_all_betas_gray_red_01 = betas_level_0_summary %>% 
   mutate(exp = "All experiments", line_thickness_1 = 2, line_thickness_2 = 0.8) %>% 
   bind_rows(betas_level_1_summary %>% 
